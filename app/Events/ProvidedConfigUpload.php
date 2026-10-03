@@ -41,11 +41,9 @@ final class ProvidedConfigUpload
      * Create a new event instance.
      */
     public function __construct(
-        public string        $fileName,
+        public string $fileName,
         public Configuration $configuration
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

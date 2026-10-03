@@ -46,11 +46,11 @@ final class RoutineManager implements RoutineManagerInterface
 {
     use CreatesAccounts;
 
-    private Configuration        $configuration;
+    private Configuration $configuration;
     private array $downloaded;
-    private ImportJob            $importJob;
-    private array                $rateLimits = [];
-    private FilterTransactions   $transactionFilter;
+    private ImportJob $importJob;
+    private array $rateLimits = [];
+    private FilterTransactions $transactionFilter;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
 
@@ -81,15 +81,15 @@ final class RoutineManager implements RoutineManagerInterface
         // share config
         $this->transactionProcessor->setImportJob($this->importJob);
         $this->transactionGenerator->setImportJob($this->importJob);
-    }    #[Override]
+    }
+
+    #[Override]
     public function getServiceAccounts(): array
     {
         Log::debug(sprintf('RoutineManager.getServiceAccounts(%d)', count($this->importJob->getServiceAccounts())));
 
         return $this->importJob->getServiceAccounts();
     }
-
-
 
     /**
      * @throws ImporterErrorException
@@ -125,7 +125,7 @@ final class RoutineManager implements RoutineManagerInterface
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // filter the transactions
-        $filtered = $this->transactionFilter->filter($transactions);
+        $filtered     = $this->transactionFilter->filter($transactions);
         Log::debug(sprintf('Filtered down to %d Firefly III transactions.', count($filtered)));
 
         // return everything.
@@ -140,12 +140,12 @@ final class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have no requests left for bank account "%s"', $account['name']);
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
                 $message .= sprintf(' (IBAN %s)', e($account['iban']));
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
                 $message .= sprintf(' (account number %s)', e($account['number']));
             }
             $message .= sprintf('. The limit resets in %s. ', Request::formatTime($rateLimit['reset']));
@@ -154,12 +154,12 @@ final class RoutineManager implements RoutineManagerInterface
             $message = sprintf('You have %d request(s) left for bank account "%s"', $rateLimit['remaining'], e($account['name']));
 
             // add IBAN if present
-            if (array_key_exists('iban', $account) && '' !== (string)$account['iban']) {
+            if (array_key_exists('iban', $account) && '' !== (string) $account['iban']) {
                 $message .= sprintf(' (IBAN %s)', e($account['iban']));
             }
 
             // add account number if present
-            if (array_key_exists('number', $account) && '' !== (string)$account['number']) {
+            if (array_key_exists('number', $account) && '' !== (string) $account['number']) {
                 $message .= sprintf(' (account number %s)', e($account['number']));
             }
             $message .= '. ';
@@ -172,7 +172,7 @@ final class RoutineManager implements RoutineManagerInterface
 
     private function findAccountInfo(array $accounts, int $accountId): ?array
     {
-        return array_find($accounts, static fn($account) => $account['id'] === $accountId);
+        return array_find($accounts, static fn ($account) => $account['id'] === $accountId);
     }
 
     /**
@@ -254,7 +254,7 @@ final class RoutineManager implements RoutineManagerInterface
                 continue;
             }
             Log::debug(sprintf('Found Firefly III account #%d ("%s") to report on.', $fireflyIIIAccount['id'], e($fireflyIIIAccount['name'])));
-            $message = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
+            $message           = $this->generateRateLimitMessage($fireflyIIIAccount, $rateLimit);
             if (0 === $rateLimit['remaining']) {
                 $this->importJob->conversionStatus->addWarning(0, $message);
             }

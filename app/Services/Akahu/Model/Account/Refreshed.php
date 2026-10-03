@@ -29,16 +29,16 @@ use Carbon\Carbon;
 final class Refreshed
 {
     // When the balance was last updated.
-    private ?Carbon $balance = null;
+    private ?Carbon $balance      = null;
 
     // When other account metadata was last updated (any account property
     // apart from balance).
-    private ?Carbon $meta = null;
+    private ?Carbon $meta         = null;
 
     // When we last checked for and processed any new transactions. This
     // flag may be missing when an account has first connected, as it takes
     // a few seconds for new transactions to be processed.
-    private ?Carbon $party = null;
+    private ?Carbon $party        = null;
 
     // When we last fetched identity data about the party who has
     // authenticated with the financial institution when connecting this
@@ -51,7 +51,7 @@ final class Refreshed
      */
     public static function fromArray(array $data): self
     {
-        $refreshed = new self();
+        $refreshed               = new self();
 
         $refreshed->balance      = array_key_exists('balance', $data) ? Carbon::parse($data['balance']) : null;
         $refreshed->meta         = array_key_exists('meta', $data) ? Carbon::parse($data['meta']) : null;
@@ -66,7 +66,7 @@ final class Refreshed
      */
     public static function fromJson(array $json): self
     {
-        $refreshed = new self();
+        $refreshed               = new self();
 
         $refreshed->balance      = array_key_exists('balance', $json) ? Carbon::parse($json['balance']) : null;
         $refreshed->meta         = array_key_exists('meta', $json) ? Carbon::parse($json['meta']) : null;

@@ -34,7 +34,7 @@ final class NewUserAgreementResponse extends Response
     public string $created;
     public string $id;
     public string $institutionId;
-    public int    $maxHistoricalDays;
+    public int $maxHistoricalDays;
 
     public function __construct(array $data)
     {

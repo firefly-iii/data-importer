@@ -31,6 +31,4 @@ use Exception;
  *
  * @deprecated
  */
-final class ApiHttpException extends Exception
-{
-}
+final class ApiHttpException extends Exception {}

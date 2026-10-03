@@ -34,24 +34,24 @@ final class SessionResponse extends Response
 {
     public array  $accounts   = [];
     public string $aspsp      = '';
-public bool   $authorized = false;
+    public bool   $authorized = false;
     public string $psuType    = ''; // API: psu_type (personal, business)
     public string $sessionId  = '';
     public string $status     = ''; // API: authorized flag
-        public ?int   $validUntil = null; // API: status
+    public ?int $validUntil   = null; // API: status
 
     public function __construct(array $data = [])
     {
-        $this->sessionId = $data['session_id'] ?? $data['id'] ?? '';
-        $this->accounts  = $data['accounts'] ?? [];
+        $this->sessionId  = $data['session_id'] ?? $data['id'] ?? '';
+        $this->accounts   = $data['accounts'] ?? [];
         // aspsp can be an object with name or a string
         $this->aspsp      = is_array($data['aspsp'] ?? null) ? $data['aspsp']['name'] ?? '' : $data['aspsp'] ?? '';
         $this->psuType    = $data['psu_type'] ?? '';
-        $this->authorized = (bool)($data['authorized'] ?? false);
+        $this->authorized = (bool) ($data['authorized'] ?? false);
         $this->status     = $data['status'] ?? '';
 
         // valid_until comes as RFC3339 string in access object, convert to timestamp
-        $validUntil = $data['access']['valid_until'] ?? null;
+        $validUntil       = $data['access']['valid_until'] ?? null;
         if (is_string($validUntil)) {
             $this->validUntil = strtotime($validUntil);
         }

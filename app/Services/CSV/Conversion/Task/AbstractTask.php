@@ -32,7 +32,7 @@ use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
  */
 abstract class AbstractTask implements TaskInterface
 {
-    protected Account             $account;
+    protected Account $account;
     protected TransactionCurrency $transactionCurrency;
 
     final public function setAccount(Account $account): void

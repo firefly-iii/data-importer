@@ -37,8 +37,8 @@ final class TransactionFetcher
     private AkahuDateRange $dateRange;
     // private ?Carbon $startDate;
     // private ?Carbon $endDate;
-    private int    $fireflyAccountId;
-    private ImportJob      $importJob;
+    private int $fireflyAccountId;
+    private ImportJob $importJob;
 
     public function __construct(string $akahuAccountId, int $fireflyAccountId, AkahuDateRange $dateRange, ImportJob $importJob)
     {
@@ -50,7 +50,7 @@ final class TransactionFetcher
 
     public function fetch(): array
     {
-        $request = new GetTransactionsRequest($this->akahuAccountId, $this->dateRange);
+        $request        = new GetTransactionsRequest($this->akahuAccountId, $this->dateRange);
 
         try {
             $response = $request->get();
@@ -69,7 +69,7 @@ final class TransactionFetcher
             return $akahuAccountId === $account->getAkahuId();
         });
 
-        $msg = sprintf('Successfully fetched %d transactions for Akahu account "%s"', count($transactions), $account->getName());
+        $msg            = sprintf('Successfully fetched %d transactions for Akahu account "%s"', count($transactions), $account->getName());
 
         $this->importJob->conversionStatus->addMessage(0, e($msg));
 

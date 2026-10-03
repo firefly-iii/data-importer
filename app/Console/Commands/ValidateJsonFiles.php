@@ -42,19 +42,20 @@ final class ValidateJsonFiles extends Command
      * @var string
      */
     protected $description = 'Recursively validate all JSON files in a directory. Stops after 100 files.';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'import:validate-json-directory {directory : The directory with JSON files to validate}';
+    protected $signature   = 'import:validate-json-directory {directory : The directory with JSON files to validate}';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        $directory = (string)$this->argument('directory');
+        $directory = (string) $this->argument('directory');
         if (!is_dir($directory) || !is_readable($directory)) {
             $this->error(sprintf('Cannot read directory %s.', $directory));
 

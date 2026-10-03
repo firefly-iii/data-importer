@@ -30,19 +30,17 @@ namespace App\Services\LunchFlow\Model;
 final class Account
 {
     public ?string $currency = null;
-    public int     $id;
-    public string  $institutionLogo;
-    public string  $institutionName;
-    public string  $name;
-    public string  $provider;
+    public int $id;
+    public string $institutionLogo;
+    public string $institutionName;
+    public string $name;
+    public string $provider;
     public ?string $status   = null;
 
     /**
      * Account constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * @return static
@@ -51,7 +49,7 @@ final class Account
     {
         $model                  = new self();
         $model->id              = $data['id'];
-        $model->institutionLogo = (string)$data['institution_logo'];
+        $model->institutionLogo = (string) $data['institution_logo'];
         $model->institutionName = $data['institution_name'];
         $model->name            = $data['name'];
         $model->provider        = $data['provider'];

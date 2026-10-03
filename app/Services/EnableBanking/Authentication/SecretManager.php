@@ -53,7 +53,7 @@ final class SecretManager
 
         if ('' === $sessionId) {
             Log::debug('No Enable Banking App ID in session, will return config variable.');
-            $sessionId = (string)config('eb.application_id');
+            $sessionId = (string) config('eb.application_id');
             if ('' === $sessionId) {
                 Log::error('The Enable Banking App ID in the configuration is empty! Did you set ENABLE_BANKING_APP_ID?');
             }
@@ -68,7 +68,7 @@ final class SecretManager
     private static function getSessionAppId(): string
     {
         try {
-            $id = (string)session()->get(self::EB_APP_ID);
+            $id = (string) session()->get(self::EB_APP_ID);
         } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $id = '';
         }
@@ -93,13 +93,13 @@ final class SecretManager
 
         if ('' === $sessionKey) {
             Log::debug('No Enable Banking private key in session, will return config variable!');
-            $privateKey = (string)config('eb.private_key');
+            $privateKey = (string) config('eb.private_key');
             if ('' === $privateKey) {
                 return '';
             }
 
             // see if this is a file that exists and is readable.
-            $path = realpath($privateKey);
+            $path       = realpath($privateKey);
             if (false !== $path && is_file($path) && file_exists($path) && is_readable($path)) {
                 Log::debug('Enable Banking private key is a file, will try to read it.');
                 $privateKey = file_get_contents($path);
@@ -116,7 +116,7 @@ final class SecretManager
 
                 return sprintf("-----BEGIN PRIVATE KEY-----\n%s\n-----END PRIVATE KEY-----", implode("\n", str_split($privateKey, 64)));
             }
-            $false = filter_var($privateKey, FILTER_VALIDATE_URL);
+            $false      = filter_var($privateKey, FILTER_VALIDATE_URL);
             if (false !== $false) {
                 Log::error(sprintf('Private key is an URL (%s)', $privateKey));
 
@@ -136,7 +136,7 @@ final class SecretManager
     private static function getSessionPrivateKey(): string
     {
         try {
-            $key = (string)session()->get(self::EB_PRIVATE_KEY);
+            $key = (string) session()->get(self::EB_PRIVATE_KEY);
         } catch (ContainerExceptionInterface|NotFoundExceptionInterface) {
             $key = '';
         }

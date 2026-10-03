@@ -28,27 +28,27 @@ use Carbon\Carbon;
 
 final class Transaction
 {
-    public string  $amount                   = '';
-    public string  $balance                  = '';
-    public string  $category                 = '';
-    public string  $checkImage               = '';
-    public string  $checkNum                 = '';
-    public ?Carbon $createdDateUtc           = null;
-    public string  $currency                 = '';
-    public Carbon  $date;
-    public string  $description              = '';
-    public string  $id                       = '';
-    public ?Carbon $lastModified             = null;
-    public Carbon  $lastModifiedUtc;
-    public string  $memo                     = '';
-    public string  $merchant                 = '';
-    public Carbon  $postDate;
-    public string  $status                   = '';
-    public Carbon  $transactionDate;
-    public string  $transactionId            = '';
-    public string  $type                     = '';
-    public string  $userId                   = '';
-    public string  $userInstitutionAccountId = '';
+    public string  $amount                  = '';
+    public string  $balance                 = '';
+    public string  $category                = '';
+    public string  $checkImage              = '';
+    public string  $checkNum                = '';
+    public ?Carbon $createdDateUtc          = null;
+    public string  $currency                = '';
+    public Carbon $date;
+    public string  $description             = '';
+    public string  $id                      = '';
+    public ?Carbon $lastModified            = null;
+    public Carbon $lastModifiedUtc;
+    public string $memo                     = '';
+    public string $merchant                 = '';
+    public Carbon $postDate;
+    public string $status                   = '';
+    public Carbon $transactionDate;
+    public string $transactionId            = '';
+    public string $type                     = '';
+    public string $userId                   = '';
+    public string $userInstitutionAccountId = '';
 
     public static function fromArray(array $array): self
     {
@@ -61,13 +61,13 @@ final class Transaction
         $object->userInstitutionAccountId = $array['UserInstitutionAccountID'];
         $object->status                   = $array['Status'];
         $object->type                     = $array['Type'];
-        $object->amount                   = (string)$array['Amount'];
+        $object->amount                   = (string) $array['Amount'];
         $object->currency                 = $array['Currency'] ?? '';
         $object->date                     = Carbon::parse($array['Date']);
         $object->transactionDate          = Carbon::parse($array['TransactionDate']);
         $object->postDate                 = Carbon::parse($array['PostDate']);
         $object->description              = $array['Description'];
-        $object->balance                  = (string)($array['Balance'] ?? '');
+        $object->balance                  = (string) ($array['Balance'] ?? '');
         $object->merchant                 = $array['Merchant'] ?? '';
         $object->category                 = $array['Category'] ?? '';
         $object->checkNum                 = $array['CheckNum'] ?? '';

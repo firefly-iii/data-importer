@@ -87,20 +87,20 @@ trait CollectsAccounts
         $request->setTimeOut(config('importer.connection.timeout'));
 
         /** @var GetAccountsResponse $result */
-        $result = $request->get();
+        $result  = $request->get();
         Log::debug(sprintf('Found %d accounts of type "%s"', count($result), $type));
-        $return = [];
+        $return  = [];
 
         /** @var Account $entry */
         foreach ($result as $entry) {
             Log::debug(sprintf('Processing account #%d ("%s") with type "%s"', $entry->id, $entry->name, $entry->type));
             $type          = $entry->type;
-            $iban          = (string)$entry->iban;
-            $accountNumber = sprintf('%s.', (string)$entry->accountNumber);
+            $iban          = (string) $entry->iban;
+            $accountNumber = sprintf('%s.', (string) $entry->accountNumber);
 
             // For expense and revenue accounts, use account ID as key since they don't usually have IBANs
             if (in_array($type, ['expense', 'revenue'], true)) {
-                $key = sprintf('id_%d', $entry->id);
+                $key          = sprintf('id_%d', $entry->id);
                 Log::debug(sprintf('Collected %s account "%s" under key "%s"', $type, $entry->name, $key));
                 $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
 
@@ -108,13 +108,13 @@ trait CollectsAccounts
             }
 
             // For asset/liability accounts, continue with IBAN-based logic
-            $iban = $this->filterSpaces($iban);
+            $iban          = $this->filterSpaces($iban);
             if ('.' !== $accountNumber) {
                 // account has an account number.
-                $accountNumber = $this->filterSpaces((string)$entry->number);
+                $accountNumber = $this->filterSpaces((string) $entry->number);
                 $key           = sprintf('nr_%s', $accountNumber);
                 Log::debug(sprintf('Collected account nr "%s" (%s) under ID #%d', $key, $entry->type, $entry->id));
-                $return[$key] = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
+                $return[$key]  = ['id' => $entry->id, 'type' => $entry->type, 'name' => $entry->name, 'number' => $entry->number];
             }
 
             // #10546 include expense and revenue accounts in the IBAN list, unless entry already exist.

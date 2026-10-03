@@ -57,19 +57,19 @@ final class RoleController extends Controller
      */
     public function index(Request $request, string $identifier)
     {
-        $importJob = $this->repository->find($identifier);
-        $flow      = $importJob->getFlow();
-        $mainTitle = 'Role definition';
-        $subTitle  = 'Data role definition';
+        $importJob     = $this->repository->find($identifier);
+        $flow          = $importJob->getFlow();
+        $mainTitle     = 'Role definition';
+        $subTitle      = 'Data role definition';
         if ('file' !== $flow) {
             return view('import.005-roles.no-define-roles')->with(compact('flow', 'mainTitle', 'subTitle'));
         }
-        $state = $importJob->getState();
+        $state         = $importJob->getState();
         if ('new' === $state || 'contains_content' === $state || 'is_parsed' === $state) {
             exit(sprintf('Job is in state "%s" so not ready for this step. Needs a better page.', $state));
         }
 
-        $warning = '';
+        $warning       = '';
         if ('configured_and_roles_defined' === $importJob->getState() || 'configured_roles_map_in_place' === $importJob->getState()) {
             $warning = trans('import.roles_defined_warning');
         }
@@ -90,22 +90,22 @@ final class RoleController extends Controller
 
     private function csvIndex(ImportJob $importJob, string $warning): View
     {
-        $mainTitle = 'Role definition';
-        $subTitle  = 'Configure the role of each column in your file';
+        $mainTitle           = 'Role definition';
+        $subTitle            = 'Configure the role of each column in your file';
         // get columns from file
-        $identifier    = $importJob->identifier;
-        $configuration = $importJob->getConfiguration();
-        $content       = $importJob->getImportableFileString($configuration->isConversion());
+        $identifier          = $importJob->identifier;
+        $configuration       = $importJob->getConfiguration();
+        $content             = $importJob->getImportableFileString($configuration->isConversion());
 
-        $columns     = RoleService::getColumns($content, $configuration);
-        $exampleData = RoleService::getExampleData($content, $configuration);
+        $columns             = RoleService::getColumns($content, $configuration);
+        $exampleData         = RoleService::getExampleData($content, $configuration);
 
         // Extract column examples and pseudo identifier examples
-        $examples       = $exampleData['columns'];
-        $pseudoExamples = $exampleData['pseudo_identifier'];
-        $ignoreWarnings = '1' === request()->old('ignore_warnings');
+        $examples            = $exampleData['columns'];
+        $pseudoExamples      = $exampleData['pseudo_identifier'];
+        $ignoreWarnings      = '1' === request()->old('ignore_warnings');
         // roles
-        $roles = config('csv.import_roles');
+        $roles               = config('csv.import_roles');
         ksort($roles);
 
         // configuration (if it is set)
@@ -135,21 +135,21 @@ final class RoleController extends Controller
     private function camtIndex(ImportJob $importJob, string $warning): View
     {
         Log::debug(sprintf('Now in camtIndex("%s", "%s")', $importJob->identifier, $warning));
-        $mainTitle     = 'Role definition';
-        $identifier    = $importJob->identifier;
-        $configuration = $importJob->getConfiguration();
-        $camtType      = $configuration->getCamtType();
-        $subTitle      = sprintf('Configure the role of each field in your camt.%s file', $camtType);
+        $mainTitle      = 'Role definition';
+        $identifier     = $importJob->identifier;
+        $configuration  = $importJob->getConfiguration();
+        $camtType       = $configuration->getCamtType();
+        $subTitle       = sprintf('Configure the role of each field in your camt.%s file', $camtType);
 
         // get example data from file.
-        $examples  = RoleService::getExampleDataFromCamt($importJob->getImportableFileString($configuration->isConversion()), $configuration);
-        $roles     = $configuration->getRoles();
-        $doMapping = $configuration->getDoMapping();
+        $examples       = RoleService::getExampleDataFromCamt($importJob->getImportableFileString($configuration->isConversion()), $configuration);
+        $roles          = $configuration->getRoles();
+        $doMapping      = $configuration->getDoMapping();
         // four levels in a CAMT file, level A B C D. Each level has a pre-defined set of
         // available fields and information.
-        $levels      = [];
-        $levels['A'] = ['title' => trans('camt.level_A'), 'explanation' => trans('camt.explain_A'), 'fields' => $this->getFieldsForLevel('A')];
-        $levels['B'] = ['title' => trans('camt.level_B'), 'explanation' => trans('camt.explain_B'), 'fields' => $this->getFieldsForLevel('B')];
+        $levels         = [];
+        $levels['A']    = ['title' => trans('camt.level_A'), 'explanation' => trans('camt.explain_A'), 'fields' => $this->getFieldsForLevel('A')];
+        $levels['B']    = ['title' => trans('camt.level_B'), 'explanation' => trans('camt.explain_B'), 'fields' => $this->getFieldsForLevel('B')];
         //        var_dump($levels['B']);
         //        var_dump($roles);
         //        exit;
@@ -206,12 +206,12 @@ final class RoleController extends Controller
             ];
         }
 
-        $old = request()->old('roles');
+        $old            = request()->old('roles');
         if (null !== $old && count($old) > 0) {
             $roles = $old;
         }
 
-        $levels = $this->mergeLevelsAndRoles($levels, $roles);
+        $levels         = $this->mergeLevelsAndRoles($levels, $roles);
 
         return view('import.005-roles.index-camt', compact(
             'mainTitle',
@@ -230,7 +230,7 @@ final class RoleController extends Controller
     {
         $allFields = config('camt.fields');
 
-        return array_filter($allFields, static fn($field) => $level === $field['level']);
+        return array_filter($allFields, static fn ($field) => $level === $field['level']);
     }
 
     private function mergeLevelsAndRoles(array $levels, array $roles): array
@@ -239,9 +239,9 @@ final class RoleController extends Controller
         foreach ($levels as $letter => $info) {
             Log::debug(sprintf('Now at level %s', $letter));
             foreach ($info['fields'] as $index => $field) {
-                $title         = $field['title'];
-                $selected      = $field['default_role'] ?? '_impossible';
-                $possibleRoles = [];
+                $title                                         = $field['title'];
+                $selected                                      = $field['default_role'] ?? '_impossible';
+                $possibleRoles                                 = [];
                 Log::debug(sprintf('Analysing level "%s" field "%s"', $letter, $title));
                 if (array_key_exists('roles', $field)) {
                     $possibleRoles = array_keys(config(sprintf('camt.roles.%s', $field['roles'])) ?? []);

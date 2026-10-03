@@ -33,7 +33,7 @@ use Iterator;
 final class GetInstitutionsResponse extends Response implements Iterator, Countable
 {
     private array $institutions;
-    private int   $position = 0;
+    private int $position = 0;
 
     public function __construct(array $data)
     {
@@ -43,7 +43,7 @@ final class GetInstitutionsResponse extends Response implements Iterator, Counta
 
         /** @var array $array */
         foreach ($data as $array) {
-            $institution = Institution::fromArray($array);
+            $institution                                                     = Institution::fromArray($array);
             if (!array_key_exists($institution->countryCode, $this->institutions)) {
                 ++$countCountries;
                 $this->institutions[$institution->countryCode] = ['country_code' => $institution->countryCode, 'institutions' => []];

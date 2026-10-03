@@ -63,22 +63,22 @@ final class TokenController extends Controller
     public function callback(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $state        = (string)session()->pull('state');
-        $codeVerifier = (string)$request->session()->pull('code_verifier');
-        $clientId     = (string)$request->session()->pull('form_client_id');
-        $baseURL      = (string)$request->session()->pull('form_base_url');
-        $vanityURL    = (string)$request->session()->pull('form_vanity_url');
+        $state        = (string) session()->pull('state');
+        $codeVerifier = (string) $request->session()->pull('code_verifier');
+        $clientId     = (string) $request->session()->pull('form_client_id');
+        $baseURL      = (string) $request->session()->pull('form_base_url');
+        $vanityURL    = (string) $request->session()->pull('form_vanity_url');
         $code         = $request->get('code');
 
-        if ($state !== (string)$request->state) {
+        if ($state !== (string) $request->state) {
             Log::error(sprintf('State according to session: "%s"', $state));
             Log::error(sprintf('State returned in request : "%s"', $request->state));
 
             throw new ImporterErrorException('The "state" returned from your server doesn\'t match the state that was sent.');
         }
         // always POST to the base URL, never the vanity URL.
-        $finalURL = sprintf('%s/oauth/token', $baseURL);
-        $params   = ['form_params' => [
+        $finalURL     = sprintf('%s/oauth/token', $baseURL);
+        $params       = ['form_params' => [
             'grant_type'    => 'authorization_code',
             'client_id'     => $clientId,
             'redirect_uri'  => route('token.callback'),
@@ -89,7 +89,7 @@ final class TokenController extends Controller
         Log::debug('Params for access token', $params);
         Log::debug(sprintf('Will contact "%s" for a token.', $finalURL));
 
-        $opts = [
+        $opts         = [
             'verify'          => config('importer.connection.verify'),
             'connect_timeout' => config('importer.connection.timeout'),
             'headers'         => ['User-Agent' => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_c'))],
@@ -100,7 +100,7 @@ final class TokenController extends Controller
         } catch (ClientException|RequestException $e) {
             $body = $e->getMessage();
             if ($e->hasResponse()) {
-                $body = (string)$e->getResponse()->getBody();
+                $body = (string) $e->getResponse()->getBody();
                 Log::error(sprintf('Client exception when decoding response: %s', $e->getMessage()));
                 Log::error(sprintf('Response from server: "%s"', $body));
 
@@ -111,7 +111,7 @@ final class TokenController extends Controller
         }
 
         try {
-            $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+            $data = json_decode((string) $response->getBody(), true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             Log::error(sprintf('JSON exception when decoding response: %s', $e->getMessage()));
             Log::error(sprintf('Response from server: "%s"', $response->getBody()));
@@ -121,10 +121,10 @@ final class TokenController extends Controller
         }
         // Log::debug('Response', $data);
 
-        SecretManager::saveAccessToken((string)$data['access_token']);
+        SecretManager::saveAccessToken((string) $data['access_token']);
         SecretManager::saveBaseUrl($baseURL);
         SecretManager::saveVanityUrl($vanityURL);
-        SecretManager::saveRefreshToken((string)$data['refresh_token']);
+        SecretManager::saveRefreshToken((string) $data['refresh_token']);
         Log::debug(sprintf('Return redirect  to "%s"', route('index')));
 
         return redirect(route('index'));
@@ -137,11 +137,11 @@ final class TokenController extends Controller
     public function doValidate(): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $response = ['result' => 'OK', 'message' => null];
+        $response        = ['result' => 'OK', 'message' => null];
 
         // Check if OAuth is configured but no session token exists
-        $clientId    = (string)config('importer.client_id');
-        $configToken = (string)config('importer.access_token');
+        $clientId        = (string) config('importer.client_id');
+        $configToken     = (string) config('importer.access_token');
         // Corrected: Use the constant value directly with session helper
         $sessionHasToken = session()->has(Constants::SESSION_ACCESS_TOKEN) && '' !== session()->get(Constants::SESSION_ACCESS_TOKEN);
 
@@ -152,9 +152,9 @@ final class TokenController extends Controller
         }
 
         // get values from secret manager:
-        $url         = SecretManager::getBaseUrl();
-        $token       = SecretManager::getAccessToken();
-        $infoRequest = new SystemInformationRequest($url, $token);
+        $url             = SecretManager::getBaseUrl();
+        $token           = SecretManager::getAccessToken();
+        $infoRequest     = new SystemInformationRequest($url, $token);
 
         $infoRequest->setVerify(config('importer.connection.verify'));
         $infoRequest->setTimeOut(config('importer.connection.timeout'));
@@ -174,42 +174,42 @@ final class TokenController extends Controller
         // 0 = OK (same version)
         // 1 = NOK (too low a version)
 
-        $minimum = (string)config('importer.minimum_version');
-        $compare = version_compare($minimum, $result->version);
+        $minimum         = (string) config('importer.minimum_version');
+        $compare         = version_compare($minimum, $result->version);
 
         if (str_starts_with($result->version, 'develop')) {
             // overrule compare, because the user is running a develop version
             Log::warning(sprintf(
-                             '[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.',
-                             config('importer.version'),
-                             $result->version
-                         ));
+                '[%s] You are connecting to a development version of Firefly III (%s). This may not work as expected.',
+                config('importer.version'),
+                $result->version
+            ));
             $compare = -1;
         }
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a branch version
             Log::warning(sprintf(
-                             '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
-                             config('importer.version'),
-                             $result->version
-                         ));
+                '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
+                config('importer.version'),
+                $result->version
+            ));
             $compare = -1;
         }
 
         if (str_starts_with($result->version, 'branch')) {
             // overrule compare, because the user is running a develop version
             Log::warning(sprintf(
-                             '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
-                             config('importer.version'),
-                             $result->version
-                         ));
+                '[%s] You are connecting to a branch version of Firefly III (%s). This may not work as expected.',
+                config('importer.version'),
+                $result->version
+            ));
             $compare = -1;
         }
 
         if (1 === $compare) {
             $errorMessage = sprintf('Your Firefly III version %s is below the minimum required version %s', $result->version, $minimum);
             Log::error(sprintf('Could not link to Firefly III: %s', $errorMessage));
-            $response = ['result' => 'NOK', 'message' => $errorMessage];
+            $response     = ['result' => 'NOK', 'message' => $errorMessage];
         }
         Log::debug('Result is', $response);
 
@@ -227,7 +227,7 @@ final class TokenController extends Controller
      */
     public function index(Request $request)
     {
-        $pageTitle = 'Data importer';
+        $pageTitle   = 'Data importer';
         Log::debug(sprintf('Now at %s', __METHOD__));
 
         $accessToken = SecretManager::getAccessToken();
@@ -261,7 +261,7 @@ final class TokenController extends Controller
         }
 
         // Option 3: either is empty, ask for client ID and/or base URL:
-        $clientId = 0 === $clientId ? '' : $clientId;
+        $clientId    = 0 === $clientId ? '' : $clientId;
 
         // if the vanity url is the same as the base url, just give this view an empty string
         if ($vanityUrl === $baseUrl) {
@@ -276,20 +276,20 @@ final class TokenController extends Controller
      */
     private function redirectForPermission(Request $request, string $baseURL, string $vanityURL, string $clientId): RedirectResponse
     {
-        $baseURL   = rtrim($baseURL, '/');
-        $vanityURL = rtrim($vanityURL, '/');
+        $baseURL               = rtrim($baseURL, '/');
+        $vanityURL             = rtrim($vanityURL, '/');
 
         Log::debug(sprintf('Now in %s(request, "%s", "%s", %d)', __METHOD__, $baseURL, $vanityURL, $clientId));
-        $state        = Str::random(40);
-        $codeVerifier = Str::random(128);
+        $state                 = Str::random(40);
+        $codeVerifier          = Str::random(128);
         $request->session()->put('state', $state);
         $request->session()->put('code_verifier', $codeVerifier);
         $request->session()->put('form_client_id', $clientId);
         $request->session()->put('form_base_url', $baseURL);
         $request->session()->put('form_vanity_url', $vanityURL);
 
-        $codeChallenge = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
-        $params        = [
+        $codeChallenge         = strtr(rtrim(base64_encode(hash('sha256', $codeVerifier, true)), '='), '+/', '-_');
+        $params                = [
             'client_id'             => $clientId,
             'redirect_uri'          => route('token.callback'),
             'response_type'         => 'code',
@@ -298,7 +298,7 @@ final class TokenController extends Controller
             'code_challenge'        => $codeChallenge,
             'code_challenge_method' => 'S256',
         ];
-        $query         = http_build_query($params);
+        $query                 = http_build_query($params);
 
         $oauthAuthorizeBaseUrl = $vanityURL;
 
@@ -306,14 +306,14 @@ final class TokenController extends Controller
         // This is a fallback in case vanity_url (derived from VANITY_URL) is empty,
         // which would indicate a configuration problem.
         if ('' === $oauthAuthorizeBaseUrl) {
-            $oauthAuthorizeBaseUrl = rtrim((string)config('importer.url'), '/');
+            $oauthAuthorizeBaseUrl = rtrim((string) config('importer.url'), '/');
         }
 
-        $finalURL = sprintf('%s/oauth/authorize?', $oauthAuthorizeBaseUrl);
+        $finalURL              = sprintf('%s/oauth/authorize?', $oauthAuthorizeBaseUrl);
         Log::debug('Query parameters are', $params);
         Log::debug(sprintf('Now redirecting to "%s" (params omitted)', $finalURL));
 
-        return redirect($finalURL . $query);
+        return redirect($finalURL.$query);
     }
 
     /**
@@ -325,24 +325,24 @@ final class TokenController extends Controller
     public function submitClientId(Request $request)
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $data = $request->validate(['client_id' => 'required|min:1|max:65536', 'base_url' => 'url']);
+        $data      = $request->validate(['client_id' => 'required|min:1|max:65536', 'base_url' => 'url']);
         Log::debug('Submitted data: ', $data);
 
-        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string)$data['base_url'], 'https://')) {
+        if (true === config('importer.expect_secure_url') && array_key_exists('base_url', $data) && !str_starts_with((string) $data['base_url'], 'https://')) {
             $request->session()->flash('secure_url', 'URL must start with https://');
 
             return redirect(route('token.index'));
         }
 
         // grab base URL from config first, otherwise from submitted data:
-        $baseURL = config('importer.url');
+        $baseURL   = config('importer.url');
         Log::debug(sprintf('[a] Base URL is "%s" (based on "FIREFLY_III_URL")', $baseURL));
         $vanityURL = $baseURL;
 
         Log::debug(sprintf('[b] Vanity URL is now "%s" (based on "FIREFLY_III_URL")', $vanityURL));
 
         // if the config has a vanity URL it will always overrule.
-        if ('' !== (string)config('importer.vanity_url')) {
+        if ('' !== (string) config('importer.vanity_url')) {
             $vanityURL = config('importer.vanity_url');
             Log::debug(sprintf('[c] Vanity URL is now "%s" (based on "VANITY_URL")', $vanityURL));
         }
@@ -352,12 +352,12 @@ final class TokenController extends Controller
             $baseURL = $data['base_url'];
             Log::debug(sprintf('[d] Base URL is now "%s" (from POST data)', $baseURL));
         }
-        if ('' === (string)$vanityURL) {
+        if ('' === (string) $vanityURL) {
             $vanityURL = $baseURL;
             Log::debug(sprintf('[e] Vanity URL is now "%s" (from base URL)', $vanityURL));
         }
 
         // return request for permission:
-        return $this->redirectForPermission($request, $baseURL, $vanityURL, (string)$data['client_id']);
+        return $this->redirectForPermission($request, $baseURL, $vanityURL, (string) $data['client_id']);
     }
 }

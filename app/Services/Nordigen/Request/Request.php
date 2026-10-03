@@ -44,10 +44,10 @@ use SensitiveParameter;
 abstract class Request
 {
     private string $base;
-    private array  $parameters;
-    private int $remaining = -1;
-    private int $reset     = -1;
-    private float  $timeOut = 3.14;
+    private array $parameters;
+    private int   $remaining = -1;
+    private int   $reset     = -1;
+    private float $timeOut   = 3.14;
     private string $token;
     private string $url;
 
@@ -101,8 +101,8 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
         Log::debug(sprintf('authenticatedGet(%s)', $fullUrl));
-        $client = $this->getClient();
-        $body   = null;
+        $client  = $this->getClient();
+        $body    = null;
 
         try {
             $res = $client->request('GET', $fullUrl, ['headers' => [
@@ -112,7 +112,7 @@ abstract class Request
                 'User-Agent'    => sprintf('FF3-data-importer/%s (%s)', config('importer.version'), config('importer.line_a')),
             ]]);
         } catch (ClientException|GuzzleException|TransferException $e) {
-            $statusCode = $e->getCode();
+            $statusCode      = $e->getCode();
             if (429 === $statusCode) {
                 Log::debug(sprintf('Ran into exception: %s', $e::class));
                 $this->logRateLimitHeaders($e->getResponse(), true);
@@ -135,12 +135,12 @@ abstract class Request
             }
 
             // if app can get response, parse it.
-            $json = [];
+            $json            = [];
             if (method_exists($e, 'getResponse')) {
-                $body = (string)$e->getResponse()->getBody();
+                $body = (string) $e->getResponse()->getBody();
                 $json = json_decode($body, true) ?? [];
             }
-            if (array_key_exists('summary', $json) && str_contains((string)$json['summary'], 'expired')) {
+            if (array_key_exists('summary', $json) && str_contains((string) $json['summary'], 'expired')) {
                 Log::error('Detected EUA expired.');
                 $exception       = new AgreementExpiredException();
                 $exception->json = $json;
@@ -162,20 +162,20 @@ abstract class Request
             // return body, class must handle this
             Log::error(sprintf('[1] Status code is %d', $res->getStatusCode()));
 
-            $body = (string)$res->getBody();
+            $body = (string) $res->getBody();
         }
-        $body ??= (string)$res->getBody();
+        $body ??= (string) $res->getBody();
 
         try {
             $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             throw new ImporterHttpException(sprintf(
-                                                'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
-                                                $fullUrl,
-                                                $res->getStatusCode(),
-                                                $e->getMessage(),
-                                                $body
-                                            ));
+                'Could not decode JSON (%s). Error[%d] is: %s. Response: %s',
+                $fullUrl,
+                $res->getStatusCode(),
+                $e->getMessage(),
+                $body
+            ));
         }
 
         if (null === $json) {
@@ -255,9 +255,9 @@ abstract class Request
      */
     private function pauseForRateLimit(ResponseInterface $res, bool $fromErrorSituation): void
     {
-        $method = $fromErrorSituation ? 'error' : 'debug';
+        $method      = $fromErrorSituation ? 'error' : 'debug';
         Log::{$method}(sprintf('[%s] Now in pauseForRateLimit', config('importer.version')));
-        $headers = $res->getHeaders();
+        $headers     = $res->getHeaders();
 
         // raw header values for debugging:
         //        Log::debug(sprintf('http_x_ratelimit_remaining: %s', json_encode($headers['http_x_ratelimit_remaining'] ?? false)));
@@ -266,13 +266,13 @@ abstract class Request
         //        Log::debug(sprintf('http_x_ratelimit_account_success_reset: %s', json_encode($headers['http_x_ratelimit_account_success_reset'] ?? false)));
 
         // first the normal rate limit:
-        $remaining = (int)($headers['http_x_ratelimit_remaining'][0] ?? -2);
-        $reset     = (int)($headers['http_x_ratelimit_reset'][0] ?? -2);
+        $remaining   = (int) ($headers['http_x_ratelimit_remaining'][0] ?? -2);
+        $reset       = (int) ($headers['http_x_ratelimit_reset'][0] ?? -2);
         $this->reportAndPause('Rate limit', $remaining, $reset, $fromErrorSituation);
 
         // then the account success rate limit:
-        $remaining = (int)($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
-        $reset     = (int)($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
+        $remaining   = (int) ($headers['http_x_ratelimit_account_success_remaining'][0] ?? -2);
+        $reset       = (int) ($headers['http_x_ratelimit_account_success_reset'][0] ?? -2);
 
         // save the remaining info in the object.
         $this->reset = $reset;
@@ -335,7 +335,7 @@ abstract class Request
 
     public static function formatTime(int $reset): string
     {
-        $return = '';
+        $return  = '';
         if ($reset < 0) {
             Log::warning('The reset time is negative!');
             $return = '-';
@@ -343,13 +343,13 @@ abstract class Request
         }
 
         // days:
-        $days = floor($reset / 86_400);
+        $days    = floor($reset / 86_400);
         if ($days > 0) {
             $return .= sprintf('%dd', $days);
         }
         $reset -= $days * 86_400;
 
-        $hours = floor($reset / 3600);
+        $hours   = floor($reset / 3600);
         if ($hours > 0) {
             $return .= sprintf('%dh', $hours);
         }
@@ -380,7 +380,7 @@ abstract class Request
             $fullUrl = sprintf('%s?%s', $fullUrl, http_build_query($this->parameters));
         }
 
-        $client = $this->getClient();
+        $client  = $this->getClient();
 
         try {
             $res = $client->request('POST', $fullUrl, [
@@ -396,7 +396,7 @@ abstract class Request
             // FIXME error response, not an exception.
             throw new ImporterHttpException(sprintf('AuthenticatedJsonPost: %s', $e->getMessage()), 0, $e);
         }
-        $body = (string)$res->getBody();
+        $body    = (string) $res->getBody();
         $this->logRateLimitHeaders($res, false);
         $this->pauseForRateLimit($res, false);
 

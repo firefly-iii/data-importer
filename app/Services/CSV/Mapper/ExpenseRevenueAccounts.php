@@ -56,11 +56,11 @@ final class ExpenseRevenueAccounts implements MapperInterface
     {
         Log::debug('getExpenseRevenueAccounts: Fetching expense and revenue accounts.');
 
-        $url   = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url                    = SecretManager::getBaseUrl();
+        $token                  = SecretManager::getAccessToken();
 
         // Fetch all accounts since API doesn't have separate expense/revenue endpoints
-        $request = new GetAccountsRequest($url, $token);
+        $request                = new GetAccountsRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setType(GetAccountsRequest::ALL);
@@ -77,10 +77,10 @@ final class ExpenseRevenueAccounts implements MapperInterface
             throw new ImporterErrorException('Could not get list of accounts.');
         }
 
-        $allAccounts = $this->toArray($response);
+        $allAccounts            = $this->toArray($response);
 
         // Filter for expense and revenue accounts only
-        $expenseRevenueAccounts = array_filter($allAccounts, static fn(Account $account) => in_array($account->type, ['expense', 'revenue'], true));
+        $expenseRevenueAccounts = array_filter($allAccounts, static fn (Account $account) => in_array($account->type, ['expense', 'revenue'], true));
 
         Log::debug(sprintf('getExpenseRevenueAccounts: Found %d expense/revenue accounts', count($expenseRevenueAccounts)));
 
@@ -122,16 +122,16 @@ final class ExpenseRevenueAccounts implements MapperInterface
                 continue;
             }
 
-            $name = $account->name;
+            $name                         = $account->name;
 
             // Add optgroup to result
-            $group                        = (string)trans(sprintf('import.account_types_%s', $account->type));
-            $result[$group]               ??= [];
+            $group                        = (string) trans(sprintf('import.account_types_%s', $account->type));
+            $result[$group] ??= [];
             $result[$group][$account->id] = $name;
         }
 
         // Sort each group
-        $newResult = [];
+        $newResult    = [];
         foreach ($result as $group => $array) {
             asort($array, SORT_STRING);
             $newResult[$group] = $array;

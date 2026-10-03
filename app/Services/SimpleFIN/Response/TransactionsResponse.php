@@ -42,7 +42,7 @@ final class TransactionsResponse extends SimpleFINResponse
 
     private function parseTransactions(): void
     {
-        $data = $this->getData();
+        $data               = $this->getData();
 
         if (0 === count($data)) {
             Log::warning('SimpleFIN TransactionsResponse: No data to parse');
@@ -52,7 +52,7 @@ final class TransactionsResponse extends SimpleFINResponse
 
         // SimpleFIN API returns transactions in the 'transactions' array within accounts
         if (array_key_exists('accounts', $data) && is_array($data['accounts'])) {
-            $transactions = [];
+            $transactions       = [];
             foreach ($data['accounts'] as $account) {
                 if (array_key_exists('transactions', $data) && is_array($account['transactions'])) {
                     $transactions = array_merge($transactions, $account['transactions']);

@@ -41,9 +41,7 @@ final class ProvidedDataUpload
      */
     public function __construct(
         public string $fileName
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

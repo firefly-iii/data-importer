@@ -37,10 +37,11 @@ use Traversable;
  */
 final class TransactionsResponse extends Response implements Countable, IteratorAggregate
 {
-    private string $accountUid   = '';
-    private array  $data         = [];
+    private string $accountUid  = '';
+    private array  $data        = [];
+
     /** @var Transaction[] */
-    private array  $transactions = [];
+    private array $transactions = [];
 
     public function __construct(array $data = [])
     {
@@ -94,7 +95,7 @@ final class TransactionsResponse extends Response implements Countable, Iterator
             Log::debug(sprintf('TransactionsResponse: flat format with %d transactions', count($transactions)));
 
             foreach ($transactions as $tx) {
-                $tx['account_uid'] = $this->accountUid;
+                $tx['account_uid']    = $this->accountUid;
                 // Map Enable Banking status values: BOOK -> booked, PDNG -> pending
                 $status               = $tx['status'] ?? 'BOOK';
                 $tx['status']         = 'BOOK' === $status ? 'booked' : 'pending';

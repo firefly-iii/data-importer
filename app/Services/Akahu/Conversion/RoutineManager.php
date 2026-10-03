@@ -36,6 +36,7 @@ final class RoutineManager implements RoutineManagerInterface
     use CreatesAccounts;
 
     private const int CREATE_ACCOUNT_SENTINEL_ID = 0;
+
     private ImportJob $importJob;
 
     public function __construct(ImportJob $importJob)
@@ -57,8 +58,8 @@ final class RoutineManager implements RoutineManagerInterface
         $transactions  = [];
 
         foreach ($accounts as $akahuAccountId => $maybeFireflyAccountId) {
-            $fireflyAccountId = $this->ensureFireflyAccountId($maybeFireflyAccountId, $akahuAccountId);
-            $dateRange        = new AkahuDateRange($configuration);
+            $fireflyAccountId    = $this->ensureFireflyAccountId($maybeFireflyAccountId, $akahuAccountId);
+            $dateRange           = new AkahuDateRange($configuration);
 
             $fetcher             = new TransactionFetcher($akahuAccountId, $fireflyAccountId, $dateRange, $this->importJob);
             $converter           = new TransactionConverter($fetcher);

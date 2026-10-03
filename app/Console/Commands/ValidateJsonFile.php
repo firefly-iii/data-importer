@@ -38,19 +38,20 @@ final class ValidateJsonFile extends Command
      * @var string
      */
     protected $description = 'Checks if a JSON file is valid according to the v3 import configuration file standard.';
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'import:validate-json {file : The JSON file to validate}';
+    protected $signature   = 'import:validate-json {file : The JSON file to validate}';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        $file = (string)$this->argument('file');
+        $file   = (string) $this->argument('file');
         if (!is_file($file) || !is_readable($file)) {
             $this->error(sprintf('File %s does not exist or is not readable.', $file));
 

@@ -43,8 +43,8 @@ final class TransactionTransformer
 
     private bool  $accountsCollected          = false;
     private array $expenseAccounts            = [];
-private array $pendingTransactionClusters = [];
-        private array $revenueAccounts            = []; // For clustering similar transactions in clean instances
+    private array $pendingTransactionClusters = [];
+    private array $revenueAccounts            = []; // For clustering similar transactions in clean instances
 
     public function __construct()
     {
@@ -54,15 +54,15 @@ private array $pendingTransactionClusters = [];
     /**
      * Transform SimpleFIN transaction data (array) to Firefly III transaction format
      *
-     * @param array $transactionData Raw transaction data from SimpleFIN JSON
+     * @param array   $transactionData      Raw transaction data from SimpleFIN JSON
      * @param Account $simpleFINAccountData Raw account data from SimpleFIN JSON for the account this transaction belongs to
-     * @param array $accountMapping Mapping configuration for Firefly III accounts
-     * @param array $newAccountConfig User-provided new account configuration data
+     * @param array   $accountMapping       Mapping configuration for Firefly III accounts
+     * @param array   $newAccountConfig     User-provided new account configuration data
      */
     public function transform(array $transactionData, Account $simpleFINAccountData, array $accountMapping = [], array $newAccountConfig = []): array
     {
         // Ensure amount is a float. SimpleFIN provides it as a string.
-        $amount = $transactionData['amount'] ?? '0.0';
+        $amount         = $transactionData['amount'] ?? '0.0';
 
         // Skip zero-amount transactions as they're invalid for Firefly III
         if (0 === bccomp('0', $amount)) {
@@ -96,7 +96,7 @@ private array $pendingTransactionClusters = [];
         //            ? (int) $transactionData['posted']
         //            : Carbon::now()->timestamp;
         //        $transactionDateCarbon = Carbon::createFromTimestamp($transactionTimestamp);
-        $bookDate = $this->getBookDate($transactionData);
+        $bookDate       = $this->getBookDate($transactionData);
 
         return [
             'type'               => $type,
@@ -129,15 +129,15 @@ private array $pendingTransactionClusters = [];
      */
     private function getCounterAccount(array $transactionData, bool $isDeposit): array
     {
-        $description = $transactionData['description'] ?? 'N/A';
-        $payee       = $transactionData['payee'] ?? $transactionData['description'] ?? '(unknown payee account)';
+        $description        = $transactionData['description'] ?? 'N/A';
+        $payee              = $transactionData['payee'] ?? $transactionData['description'] ?? '(unknown payee account)';
         Log::debug('Now in getCounterAccount', $transactionData);
 
         // Ensure accounts are collected
         $this->ensureAccountsCollected();
 
         // Try to find existing expense or revenue account first
-        $existingAccount = $this->findExistingAccount($payee, $isDeposit);
+        $existingAccount    = $this->findExistingAccount($payee, $isDeposit);
         if (null !== $existingAccount && [] !== $existingAccount) {
             return ['id' => $existingAccount['id'], 'name' => $existingAccount['name'], 'iban' => null, 'number' => null, 'bic' => null];
         }
@@ -191,8 +191,8 @@ private array $pendingTransactionClusters = [];
 
         try {
             // Verify authentication context exists before making API calls
-            $baseUrl     = SecretManager::getBaseUrl();
-            $accessToken = SecretManager::getAccessToken();
+            $baseUrl                 = SecretManager::getBaseUrl();
+            $accessToken             = SecretManager::getAccessToken();
 
             if ('' === $baseUrl || '' === $accessToken) {
                 Log::warning('Missing authentication context for account collection, skipping smart matching');
@@ -204,10 +204,10 @@ private array $pendingTransactionClusters = [];
             }
 
             Log::debug('Collecting expense accounts from Firefly III');
-            $this->expenseAccounts = $this->collectExpenseAccounts();
+            $this->expenseAccounts   = $this->collectExpenseAccounts();
 
             Log::debug('Collecting revenue accounts from Firefly III');
-            $this->revenueAccounts = $this->collectRevenueAccounts();
+            $this->revenueAccounts   = $this->collectRevenueAccounts();
 
             Log::debug(sprintf('Collected %d expense accounts and %d revenue accounts', count($this->expenseAccounts), count($this->revenueAccounts)));
 
@@ -226,8 +226,8 @@ private array $pendingTransactionClusters = [];
      */
     private function findExistingAccount(string $description, bool $isDeposit): ?array
     {
-        $accountsToSearch = $isDeposit ? $this->revenueAccounts : $this->expenseAccounts;
-        $accountType      = $isDeposit ? 'revenue' : 'expense';
+        $accountsToSearch      = $isDeposit ? $this->revenueAccounts : $this->expenseAccounts;
+        $accountType           = $isDeposit ? 'revenue' : 'expense';
 
         if (0 === count($accountsToSearch)) {
             Log::debug(sprintf('No %s accounts to search', $accountType));
@@ -251,7 +251,7 @@ private array $pendingTransactionClusters = [];
         }
 
         // Try fuzzy matching if no exact match found
-        $bestMatch = $this->findBestFuzzyMatch($normalizedDescription, $accountsToSearch);
+        $bestMatch             = $this->findBestFuzzyMatch($normalizedDescription, $accountsToSearch);
         if (null !== $bestMatch && [] !== $bestMatch) {
             Log::debug(sprintf('Fuzzy match found: "%s" -> "%s" (similarity: %.2f)', $description, $bestMatch['account']['name'], $bestMatch['similarity']));
 
@@ -270,7 +270,7 @@ private array $pendingTransactionClusters = [];
         $normalized = strtolower($text);
 
         // Remove common transaction prefixes/suffixes
-        $patterns = [
+        $patterns   = [
             '/^(payment|deposit|transfer|debit|credit)\s+/i',
             '/\s+(payment|deposit|transfer|debit|credit)$/i',
             '/^(from|to)\s+/i',
@@ -279,14 +279,14 @@ private array $pendingTransactionClusters = [];
         ];
 
         foreach ($patterns as $pattern) {
-            $normalized = preg_replace($pattern, '', (string)$normalized);
+            $normalized = preg_replace($pattern, '', (string) $normalized);
         }
 
         // Remove special characters and extra spaces
-        $normalized = preg_replace('/[^a-z0-9\s]/', '', (string)$normalized);
-        $normalized = preg_replace('/\s+/', ' ', (string)$normalized);
+        $normalized = preg_replace('/[^a-z0-9\s]/', '', (string) $normalized);
+        $normalized = preg_replace('/\s+/', ' ', (string) $normalized);
 
-        return trim((string)$normalized);
+        return trim((string) $normalized);
     }
 
     /**
@@ -307,7 +307,7 @@ private array $pendingTransactionClusters = [];
             $normalizedAccountName = $this->normalizeForMatching($account['name']);
 
             // Calculate similarity using multiple algorithms
-            $similarity = $this->calculateSimilarity($normalizedDescription, $normalizedAccountName);
+            $similarity            = $this->calculateSimilarity($normalizedDescription, $normalizedAccountName);
 
             if ($similarity > $bestSimilarity && $similarity >= $threshold) {
                 $bestSimilarity = $similarity;
@@ -324,7 +324,7 @@ private array $pendingTransactionClusters = [];
     private function calculateSimilarity(string $str1, string $str2): float
     {
         // Use Levenshtein distance for similarity
-        $maxLen = max(strlen($str1), strlen($str2));
+        $maxLen                = max(strlen($str1), strlen($str2));
         if (0 === $maxLen) {
             return 1.0;
         }
@@ -337,13 +337,13 @@ private array $pendingTransactionClusters = [];
         $similarTextSimilarity = $percent / 100;
 
         // Check for substring matches (give bonus for contains)
-        $substringBonus = 0;
+        $substringBonus        = 0;
         if (str_contains($str1, $str2) || str_contains($str2, $str1)) {
             $substringBonus = 0.2;
         }
 
         // Weighted average of different similarity measures
-        $finalSimilarity = ($levenshteinSimilarity * 0.5) + ($similarTextSimilarity * 0.4) + $substringBonus;
+        $finalSimilarity       = ($levenshteinSimilarity * 0.5) + ($similarTextSimilarity * 0.4) + $substringBonus;
 
         return min(1.0, $finalSimilarity);
     }
@@ -353,9 +353,9 @@ private array $pendingTransactionClusters = [];
      */
     private function findClusteredAccountName(string $description, bool $isDeposit): ?string
     {
-        $accountType           = $isDeposit ? 'revenue' : 'expense';
-        $normalizedDescription = $this->normalizeForMatching($description);
-        $threshold             = config('simplefin.clustering_similarity_threshold', 0.7);
+        $accountType                                    = $isDeposit ? 'revenue' : 'expense';
+        $normalizedDescription                          = $this->normalizeForMatching($description);
+        $threshold                                      = config('simplefin.clustering_similarity_threshold', 0.7);
 
         // Check existing clusters for similar descriptions
         foreach ($this->pendingTransactionClusters as $clusterName => $cluster) {
@@ -398,22 +398,22 @@ private array $pendingTransactionClusters = [];
     private function generateClusterName(string $description): string
     {
         // Extract core business/merchant name for clustering
-        $cleaned = $this->extractCounterAccountName($description);
+        $cleaned     = $this->extractCounterAccountName($description);
 
         // Further normalize for cluster naming
         $clusterName = preg_replace('/\b(payment|deposit|transfer|debit|credit|from|to)\b/i', '', $cleaned);
-        $clusterName = preg_replace('/\s+/', ' ', trim((string)$clusterName));
+        $clusterName = preg_replace('/\s+/', ' ', trim((string) $clusterName));
 
         // Remove trailing numbers/references that could vary
-        $clusterName = preg_replace('/\s+\d+\s*$/', '', (string)$clusterName);
-        $clusterName = preg_replace('/\s+#\w+.*$/', '', (string)$clusterName);
+        $clusterName = preg_replace('/\s+\d+\s*$/', '', (string) $clusterName);
+        $clusterName = preg_replace('/\s+#\w+.*$/', '', (string) $clusterName);
 
         // Ensure minimum meaningful length
-        if (strlen((string)$clusterName) < 3) {
+        if (strlen((string) $clusterName) < 3) {
             $clusterName = $cleaned; // Fall back to basic cleaning
         }
 
-        return trim((string)$clusterName);
+        return trim((string) $clusterName);
     }
 
     /**
@@ -422,7 +422,7 @@ private array $pendingTransactionClusters = [];
     private function extractCounterAccountName(string $description): string
     {
         // Clean up and format the description for use as account name
-        $cleaned = trim($description);
+        $cleaned  = trim($description);
 
         // Remove common prefixes/suffixes that don't help identify the account
         $patterns = [
@@ -433,10 +433,10 @@ private array $pendingTransactionClusters = [];
         ];
 
         foreach ($patterns as $pattern) {
-            $cleaned = preg_replace($pattern, '', (string)$cleaned);
+            $cleaned = preg_replace($pattern, '', (string) $cleaned);
         }
 
-        $cleaned = trim((string)$cleaned);
+        $cleaned  = trim((string) $cleaned);
 
         // If we end up with an empty string, use a generic name
         if ('' === $cleaned) {
@@ -445,7 +445,7 @@ private array $pendingTransactionClusters = [];
 
         // Limit length to reasonable size
         if (strlen($cleaned) > 100) {
-            return substr($cleaned, 0, 97) . '...';
+            return substr($cleaned, 0, 97).'...';
         }
 
         return $cleaned;
@@ -456,7 +456,7 @@ private array $pendingTransactionClusters = [];
      */
     private function getFireflyAccount(Account $simpleFINAccountData, array $accountMapping, array $newAccountConfig = []): array
     {
-        $accountKey = $simpleFINAccountData->getId();
+        $accountKey       = $simpleFINAccountData->getId();
 
         // Check for user-provided account name first, then fall back to SimpleFIN account name
         $userProvidedName = null;
@@ -464,7 +464,7 @@ private array $pendingTransactionClusters = [];
             $userProvidedName = $newAccountConfig[$accountKey]['name'];
         }
 
-        $accountName = $userProvidedName ?? $simpleFINAccountData->getName();
+        $accountName      = $userProvidedName ?? $simpleFINAccountData->getName();
 
         // Check if account is mapped and has a valid (non-zero) Firefly III account ID
         if (array_key_exists($accountKey, $accountMapping) && $accountMapping[$accountKey] > 0) {
@@ -487,8 +487,8 @@ private array $pendingTransactionClusters = [];
      */
     private function getBookDate(array $transactionData): string
     {
-        if (array_key_exists('posted', $transactionData) && (int)$transactionData['posted'] > 0) {
-            return Carbon::createFromTimestamp((int)$transactionData['posted'])->toW3cString();
+        if (array_key_exists('posted', $transactionData) && (int) $transactionData['posted'] > 0) {
+            return Carbon::createFromTimestamp((int) $transactionData['posted'])->toW3cString();
         }
 
         return '';
@@ -501,8 +501,8 @@ private array $pendingTransactionClusters = [];
      */
     private function getTransactionDate(array $transactionData): ?string
     {
-        if (array_key_exists('transacted_at', $transactionData) && (int)$transactionData['transacted_at'] > 0) {
-            return Carbon::createFromTimestamp((int)$transactionData['transacted_at'])->toW3cString();
+        if (array_key_exists('transacted_at', $transactionData) && (int) $transactionData['transacted_at'] > 0) {
+            return Carbon::createFromTimestamp((int) $transactionData['transacted_at'])->toW3cString();
         }
         $alt = $this->getBookDate($transactionData);
         if ('' === $alt) {
@@ -542,20 +542,20 @@ private array $pendingTransactionClusters = [];
         // The previous code returned 'XXX' for custom.
         if (3 === strlen($currency)) {
             Log::debug(sprintf(
-                           'getCurrencyCode for account "%s" ("%s") will return "%s"',
-                           $simpleFINAccountData->getId(),
-                           $simpleFINAccountData->getName(),
-                           strtoupper($currency)
-                       ));
+                'getCurrencyCode for account "%s" ("%s") will return "%s"',
+                $simpleFINAccountData->getId(),
+                $simpleFINAccountData->getName(),
+                strtoupper($currency)
+            ));
 
             return strtoupper($currency);
         }
         Log::warning(sprintf(
-                         'getCurrencyCode for account "%s" ("%s") found "%s", will return "XXX" instead.',
-                         $simpleFINAccountData->getId(),
-                         $simpleFINAccountData->getName(),
-                         $currency
-                     ));
+            'getCurrencyCode for account "%s" ("%s") found "%s", will return "XXX" instead.',
+            $simpleFINAccountData->getId(),
+            $simpleFINAccountData->getName(),
+            $currency
+        ));
 
         return 'XXX'; // Default for non-standard or missing currency codes, matching previous behavior.
     }
@@ -565,7 +565,7 @@ private array $pendingTransactionClusters = [];
      */
     private function extractCategory(array $transactionData): ?string
     {
-        $extra = $transactionData['extra'] ?? null;
+        $extra          = $transactionData['extra'] ?? null;
         if (!is_array($extra)) {
             return null;
         }
@@ -574,8 +574,8 @@ private array $pendingTransactionClusters = [];
         $categoryFields = ['category', 'Category', 'CATEGORY', 'merchant_category', 'transaction_category'];
 
         foreach ($categoryFields as $field) {
-            if (array_key_exists($field, $extra) && '' !== (string)$extra[$field]) {
-                return (string)$extra[$field];
+            if (array_key_exists($field, $extra) && '' !== (string) $extra[$field]) {
+                return (string) $extra[$field];
             }
         }
 
@@ -599,7 +599,7 @@ private array $pendingTransactionClusters = [];
             $noteFields = ['memo', 'notes', 'reference', 'check_number'];
 
             foreach ($noteFields as $field) {
-                if (array_key_exists($field, $extra) && '' !== (string)$extra[$field]) {
+                if (array_key_exists($field, $extra) && '' !== (string) $extra[$field]) {
                     $notes[] = sprintf('- %s: %s', ucfirst($field), $extra[$field]);
                 }
             }
@@ -613,7 +613,7 @@ private array $pendingTransactionClusters = [];
      */
     private function extractTags(array $transactionData): array
     {
-        $tags = [];
+        $tags  = [];
 
         if (array_key_exists('pending', $transactionData) && true === $transactionData['pending']) {
             $tags[] = 'pending';

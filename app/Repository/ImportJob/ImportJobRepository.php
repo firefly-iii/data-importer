@@ -82,7 +82,7 @@ final class ImportJobRepository
         $disk = $this->getDisk();
         $path = sprintf('%s.json', $importJob->identifier);
         if ($disk->exists($path)) {
-            $content = trim((string)$disk->get($path));
+            $content = trim((string) $disk->get($path));
             if ('' !== $content) {
                 $valid = json_validate($content);
                 if ($valid) {
@@ -91,10 +91,10 @@ final class ImportJobRepository
                     $newInstanceCounter = $importJob->getInstanceCounter();
                     if ($oldInstanceCounter > $newInstanceCounter) {
                         throw new ImporterErrorException(sprintf(
-                                                             'Cowardly refuse to overwrite current (#%d) import job file with given (#%d).',
-                                                             $oldInstanceCounter,
-                                                             $newInstanceCounter
-                                                         ));
+                            'Cowardly refuse to overwrite current (#%d) import job file with given (#%d).',
+                            $oldInstanceCounter,
+                            $newInstanceCounter
+                        ));
                     }
                 }
             }
@@ -124,8 +124,8 @@ final class ImportJobRepository
         if (!Uuid::isValid($identifier)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
-        $disk = $this->getDisk();
-        $file = sprintf('%s.json', $identifier);
+        $disk    = $this->getDisk();
+        $file    = sprintf('%s.json', $identifier);
         if (!$disk->exists($file)) {
             throw new ImporterErrorException(sprintf('There is no import job with identifier "%s".', $identifier));
         }
@@ -165,8 +165,8 @@ final class ImportJobRepository
         // collect Firefly III accounts, if not already in place for this job.
         // this function returns an array with keys 'assets' and 'liabilities', each containing an array of Firefly III accounts.
 
-        $allAccounts = $importJob->getApplicationAccounts();
-        $count       = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
+        $allAccounts   = $importJob->getApplicationAccounts();
+        $count         = count($allAccounts[Constants::ASSET_ACCOUNTS] ?? []) + count($allAccounts[Constants::LIABILITIES] ?? []);
         if (0 === $count) {
             Log::debug('No asset accounts or liabilities found, will collect them now.');
             $applicationAccounts = $this->getApplicationAccounts();
@@ -185,9 +185,9 @@ final class ImportJobRepository
         switch ($importJob->getFlow()) {
             case 'file':
                 // do file content sherlock things.
-                $detector = new FileContentSherlock();
-                $content  = $importJob->getImportableFileString($configuration->isConversion());
-                $fileType = $detector->detectContentTypeFromContent($content);
+                $detector      = new FileContentSherlock();
+                $content       = $importJob->getImportableFileString($configuration->isConversion());
+                $fileType      = $detector->detectContentTypeFromContent($content);
                 $configuration->setContentType($fileType);
                 if ('camt' === $fileType) {
                     $camtType = $detector->getCamtType();
@@ -197,9 +197,9 @@ final class ImportJobRepository
                 break;
 
             case 'lunchflow':
-                $validator = new LunchFlowNewJobDataCollector();
+                $validator     = new LunchFlowNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag = $validator->collectAccounts();
+                $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
@@ -207,9 +207,9 @@ final class ImportJobRepository
                 break;
 
             case 'simplefin':
-                $validator = new SimpleFINNewJobDataCollector();
+                $validator     = new SimpleFINNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag = $validator->collectAccounts();
+                $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
@@ -218,9 +218,9 @@ final class ImportJobRepository
 
             case 'nordigen':
                 // nordigen, download list of accounts.
-                $validator = new NordigenNewJobDataCollector();
+                $validator     = new NordigenNewJobDataCollector();
                 $validator->setImportJob($importJob);
-                $messageBag = $validator->collectAccounts();
+                $messageBag    = $validator->collectAccounts();
                 // get import job + configuration back:
                 $importJob     = $validator->getImportJob();
                 $configuration = $importJob->getConfiguration();
@@ -234,7 +234,7 @@ final class ImportJobRepository
                 break;
 
             case 'eb':
-                $validator = new EnableBankingNewJobDataCollector();
+                $validator     = new EnableBankingNewJobDataCollector();
                 $validator->setImportJob($importJob);
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
@@ -243,7 +243,7 @@ final class ImportJobRepository
                 break;
 
             case 'akahu':
-                $validator = new AkahuNewJobDataCollector();
+                $validator     = new AkahuNewJobDataCollector();
                 $validator->setImportJob($importJob);
                 $messageBag    = $validator->collectAccounts();
                 $importJob     = $validator->getImportJob();
@@ -261,7 +261,7 @@ final class ImportJobRepository
             $importJob->setState('is_parsed');
             $importJob->setInitialized(true);
         }
-        $importJob = $this->setConfiguration($importJob, $configuration);
+        $importJob     = $this->setConfiguration($importJob, $configuration);
         $this->saveToDisk($importJob);
 
         // if parse errors, display to user with a redirect to upload?
@@ -278,8 +278,8 @@ final class ImportJobRepository
         $url      = null;
 
         try {
-            $url   = SecretManager::getBaseUrl();
-            $token = SecretManager::getAccessToken();
+            $url           = SecretManager::getBaseUrl();
+            $token         = SecretManager::getAccessToken();
 
             if ('' === $url || '' === $token) {
                 Log::error('Base URL or Access Token is empty. Cannot fetch accounts.', ['url_empty' => '' === $url, 'token_empty' => '' === $token]);
@@ -289,7 +289,7 @@ final class ImportJobRepository
 
             // Fetch ASSET accounts
             Log::debug('Fetching asset accounts from Firefly III.', ['url' => $url]);
-            $requestAsset = new GetAccountsRequest($url, $token);
+            $requestAsset  = new GetAccountsRequest($url, $token);
             $requestAsset->setType(GetAccountsRequest::ASSET);
             $requestAsset->setVerify(config('importer.connection.verify'));
             $requestAsset->setTimeOut(config('importer.connection.timeout'));
@@ -314,7 +314,7 @@ final class ImportJobRepository
 
         try {
             Log::debug('Fetching liability accounts from Firefly III.', ['url' => $url]);
-            $requestLiability = new GetAccountsRequest($url, $token);
+            $requestLiability  = new GetAccountsRequest($url, $token);
             $requestLiability->setVerify(config('importer.connection.verify'));
             $requestLiability->setTimeOut(config('importer.connection.timeout'));
             $requestLiability->setType(GetAccountsRequest::LIABILITIES);

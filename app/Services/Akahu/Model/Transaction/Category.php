@@ -32,13 +32,13 @@ namespace App\Services\Akahu\Model\Transaction;
 final class Category
 {
     // The NZFCC Category ID
-    private array $groups = [];
+    private array $groups                               = [];
 
     // The NZFCC Category Name
-    private ?string $name = null;
+    private ?string $name                               = null;
 
     // Higher level groupings that a category belongs to.
-    private ?string $nzfccId = null;
+    private ?string               $nzfccId              = null;
     private ?PersonalFinanceGroup $personalFinanceGroup = null;
 
     /**
@@ -46,7 +46,7 @@ final class Category
      */
     public static function fromJson(array $json): self
     {
-        $category = new self();
+        $category          = new self();
 
         $category->nzfccId = $json['_id'] ?? null;
         $category->name    = $json['name'] ?? null;

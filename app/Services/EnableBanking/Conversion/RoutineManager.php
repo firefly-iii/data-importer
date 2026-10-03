@@ -40,10 +40,10 @@ use Override;
  */
 final class RoutineManager implements RoutineManagerInterface
 {
-    private Configuration        $configuration;
-    private array                $downloaded;
-    private ImportJob            $importJob;
-    private ImportJobRepository  $repository;
+    private Configuration $configuration;
+    private array $downloaded;
+    private ImportJob $importJob;
+    private ImportJobRepository $repository;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
 
@@ -68,15 +68,15 @@ final class RoutineManager implements RoutineManagerInterface
 
         $this->transactionProcessor->setImportJob($this->importJob);
         $this->transactionGenerator->setImportJob($this->importJob);
-    }    #[Override]
+    }
+
+    #[Override]
     public function getServiceAccounts(): array
     {
         Log::debug(sprintf('RoutineManager.getServiceAccounts(%d)', count($this->importJob->getServiceAccounts())));
 
         return $this->importJob->getServiceAccounts();
     }
-
-
 
     /**
      * @throws ImporterErrorException

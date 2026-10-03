@@ -33,8 +33,7 @@ final class TransactionConverter
 {
     public function __construct(
         private Configuration $configuration
-    )
-    {
+    ) {
         Log::debug('Constructed TransactionConverter.');
     }
 
@@ -43,7 +42,7 @@ final class TransactionConverter
      */
     public function convert(array $transactions): array
     {
-        $total = count($transactions);
+        $total  = count($transactions);
         Log::debug(sprintf('Convert all %d transactions into pseudo-transactions.', $total));
         $result = [];
 
@@ -77,18 +76,19 @@ final class TransactionConverter
             // loop all available roles, see if they're configured and if so, get the associated field from the transaction.
             // some roles can be configured multiple times, so the $current array may hold multiple values.
             // the final response to this may be to join these fields or only use the last one.
-            $current = [];
+            $current                  = [];
             foreach ($fieldNames as $field) {
-                $field = (string)$field;
+                $field = (string) $field;
+
                 /** @var string $role */
-                $role = $allRoles[$field] ?? '_ignore';
+                $role  = $allRoles[$field] ?? '_ignore';
                 if ('_ignore' !== $role) {
                     Log::debug(sprintf('Field "%s" was given role "%s".', $field, $role));
                 }
                 if ('_ignore' === $role) {
                     Log::debug(sprintf('Field "%s" is ignored!', $field));
                 }
-                //Log::debug(sprintf('Now processing field "%s" with role "%s"', $field, $role));
+                // Log::debug(sprintf('Now processing field "%s" with role "%s"', $field, $role));
                 // get by index, so grab it from the appropriate split or get the first one.
                 $value = trim($transaction->getFieldByIndex($field, $i));
                 if ('' !== $value) {
@@ -97,7 +97,7 @@ final class TransactionConverter
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }
                     $current[$role]['data'][$field] = $value;
-                    $current[$role]['data'] = array_unique($current[$role]['data']);
+                    $current[$role]['data']         = array_unique($current[$role]['data']);
                 }
             }
             $result['transactions'][] = $current;

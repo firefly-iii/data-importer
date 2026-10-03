@@ -52,7 +52,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $msg = 'Akahu credentials could not be authenticated, either the access tokens provided are invalid or have been revoked. You can try authenticating again or see the logs for more infomation.';
 
                 $messages->add('no_accounts', $msg);
-                Log::error($msg . ' | ' . $e->getMessage());
+                Log::error($msg.' | '.$e->getMessage());
 
                 return $messages;
             }
@@ -64,7 +64,7 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                 $msg = 'Akahu returned Forbidden when using the provided credentials, make sure all necessary permissions are granted in the Akahu website. You can try authenticating again or see the logs for more infomation.';
 
                 $messages->add('no_accounts', $msg);
-                Log::error($msg . ' | ' . $e->getMessage());
+                Log::error($msg.' | '.$e->getMessage());
 
                 return $messages;
             }

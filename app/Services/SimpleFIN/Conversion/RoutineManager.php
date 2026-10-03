@@ -41,8 +41,8 @@ final class RoutineManager implements RoutineManagerInterface
 {
     use CreatesAccounts;
 
-    private ImportJob                       $importJob;
-    private readonly SimpleFINService       $simpleFINService;
+    private ImportJob $importJob;
+    private readonly SimpleFINService $simpleFINService;
     private readonly TransactionTransformer $transformer;
 
     /**
@@ -62,7 +62,9 @@ final class RoutineManager implements RoutineManagerInterface
     public function getImportJob(): ImportJob
     {
         return $this->importJob;
-    }    #[Override]
+    }
+
+    #[Override]
     public function getServiceAccounts(): array
     {
         Log::debug('Return getServiceAccounts from RoutineManager.');
@@ -83,20 +85,20 @@ final class RoutineManager implements RoutineManagerInterface
         }
 
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $configuration = $this->importJob->getConfiguration();
-        $accounts      = $configuration->getAccounts();
+        $configuration                 = $this->importJob->getConfiguration();
+        $accounts                      = $configuration->getAccounts();
         Log::info(sprintf('Processing %d SimpleFIN account(s)', count($accounts)));
 
-        $allAccountIds = [];
+        $allAccountIds                 = [];
 
         /**
-         * @var string|int $importServiceAccountId
-         * @var int $applicationAccountId
+         * @var int|string $importServiceAccountId
+         * @var int        $applicationAccountId
          */
         foreach ($accounts as $importServiceAccountId => $applicationAccountId) {
-            $importServiceAccountId = (string)$importServiceAccountId;
+            $importServiceAccountId = (string) $importServiceAccountId;
             Log::debug(sprintf('Now testing account "%s": #%d', $importServiceAccountId, $applicationAccountId));
-            $res = $this->isValidAccount($importServiceAccountId, $applicationAccountId);
+            $res                    = $this->isValidAccount($importServiceAccountId, $applicationAccountId);
             if ($res) {
                 Log::debug(sprintf('Account "%s": #%d is a valid account, will download from.', $importServiceAccountId, $applicationAccountId));
                 $allAccountIds[$applicationAccountId] = $importServiceAccountId;
@@ -105,7 +107,7 @@ final class RoutineManager implements RoutineManagerInterface
                 Log::debug(sprintf('Account "%s": #%d is NOT a valid account, will be skipped.', $importServiceAccountId, $applicationAccountId));
             }
         }
-        $transactions = $this->processAccounts($allAccountIds);
+        $transactions                  = $this->processAccounts($allAccountIds);
 
         Log::info('SimpleFIN conversion completed', ['total_transactions' => count($transactions)]);
 
@@ -122,7 +124,7 @@ final class RoutineManager implements RoutineManagerInterface
         /** @var null|Account $currentSimpleFINAccountData */
         $currentSimpleFINAccountData = array_find(
             $this->existingServiceAccounts,
-            static fn(Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId
+            static fn (Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId
         );
 
         if (null === $currentSimpleFINAccountData) {
@@ -157,11 +159,12 @@ final class RoutineManager implements RoutineManagerInterface
         // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
 
         foreach ($allTransactions as $importServiceAccountId => $transactions) {
-            $importServiceAccountId = (string)$importServiceAccountId;
+            $importServiceAccountId  = (string) $importServiceAccountId;
+
             /** @var null|Account $currentSimpleFINAccount */
             $currentSimpleFINAccount = array_find(
                 $this->existingServiceAccounts,
-                static fn(Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId
+                static fn (Account $loopAccount) => $loopAccount->getId() === $importServiceAccountId
             );
             if (null === $currentSimpleFINAccount) {
                 Log::error(sprintf('It is quite impossible, but could not find a matching simplefin account for %s', $importServiceAccountId));
@@ -183,7 +186,7 @@ final class RoutineManager implements RoutineManagerInterface
                 }
 
                 // Wrap transaction in group structure expected by Firefly III
-                $transactionGroup = [
+                $transactionGroup       = [
                     'error_if_duplicate_hash' => $this->importJob->getConfiguration()->isIgnoreDuplicateTransactions(),
                     'apply_rules'             => $this->importJob->getConfiguration()->isRules(),
                     'fire_webhooks'           => $this->importJob->getConfiguration()->isWebhooks(),
@@ -191,13 +194,11 @@ final class RoutineManager implements RoutineManagerInterface
                     'transactions'            => [$transformedTransaction],
                 ];
 
-                $return[] = $transactionGroup;
+                $return[]               = $transactionGroup;
             }
         }
         Log::debug(sprintf('Will return %d parsed and processed transactions.', count($return)));
 
         return $return;
     }
-
-
 }

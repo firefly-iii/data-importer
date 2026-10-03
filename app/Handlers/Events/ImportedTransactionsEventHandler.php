@@ -54,7 +54,7 @@ final class ImportedTransactionsEventHandler
             return;
         }
 
-        $log = [
+        $log      = [
             'messages'    => $event->messages,
             'warnings'    => $event->warnings,
             'errors'      => $event->errors,

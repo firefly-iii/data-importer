@@ -33,14 +33,14 @@ use InvalidArgumentException;
 final class Account
 {
     public ?string $availableBalance;
-    public string  $balance;
-    public int     $balanceDate;
-    public string  $currency;
-    public array   $extra;
-    public string  $id;
-    public string  $name;
-    public array   $org;
-    public array   $transactions;
+    public string $balance;
+    public int $balanceDate;
+    public string $currency;
+    public array $extra;
+    public string $id;
+    public string $name;
+    public array $org;
+    public array $transactions;
 
     public function __construct(array $data)
     {
@@ -103,7 +103,7 @@ final class Account
 
     public function getAvailableBalanceAsFloat(): ?float
     {
-        return null !== $this->availableBalance ? (float)$this->availableBalance : null;
+        return null !== $this->availableBalance ? (float) $this->availableBalance : null;
     }
 
     public function getBalance(): string
@@ -113,7 +113,7 @@ final class Account
 
     public function getBalanceAsFloat(): float
     {
-        return (float)$this->balance;
+        return (float) $this->balance;
     }
 
     public function getBalanceDate(): int

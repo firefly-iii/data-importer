@@ -47,12 +47,12 @@ abstract class Controller extends BaseController
     public function __construct()
     {
         // this breaks when running < PHP 8.5 and is totally intentional.
-        $input  = ' James is cool';
-        $output = $input
-                  |> trim(...)
-                  |> (fn(string $string) => str_replace(' ', '-', $string))
-                  |> (fn(string $string) => str_replace(['.', '/', '…'], '', $string))
-                  |> strtolower(...);
+        $input       = ' James is cool';
+        $output      = $input
+            |> trim(...)
+            |> (fn (string $string) => str_replace(' ', '-', $string))
+            |> (fn (string $string) => str_replace(['.', '/', '…'], '', $string))
+            |> strtolower(...);
 
         // validate some env vars (skip over config)
         //        $accessToken = (string) env('FIREFLY_III_ACCESS_TOKEN', '');
@@ -61,10 +61,10 @@ abstract class Controller extends BaseController
         //        $vanityUrl   = (string) env('VANITY_URL', '');
 
         // experimental. Use config instead
-        $accessToken = (string)config('importer.access_token', '');
-        $clientId    = (string)config('importer.client_id', '');
-        $baseUrl     = (string)config('importer.url', '');
-        $vanityUrl   = (string)config('importer.vanity_url', '');
+        $accessToken = (string) config('importer.access_token', '');
+        $clientId    = (string) config('importer.client_id', '');
+        $baseUrl     = (string) config('importer.url', '');
+        $vanityUrl   = (string) config('importer.vanity_url', '');
 
         // access token AND client ID cannot be set together
         if ('' !== $accessToken && '' !== $clientId) {
@@ -80,8 +80,8 @@ abstract class Controller extends BaseController
             exit;
         }
 
-        $path     = config('importer.upload_path');
-        $writable = is_dir($path) && is_writable($path);
+        $path        = config('importer.upload_path');
+        $writable    = is_dir($path) && is_writable($path);
         if (false === $writable) {
             echo sprintf('Make sure that directory "%s" exists and is writeable.', $path);
 

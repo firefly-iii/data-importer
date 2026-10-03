@@ -42,7 +42,7 @@ final class GetInstitutionsRequest extends Request
         $this->accessKey = $accessKey;
         $this->url       = 'api/v2/institutions';
         // $this->url       = 'exapmple/';
-        $this->method = 'GET'; // hard coded for this particular object.
+        $this->method    = 'GET'; // hard coded for this particular object.
         $this->calculateAuthString();
     }
 

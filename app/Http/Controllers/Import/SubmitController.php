@@ -56,9 +56,9 @@ final class SubmitController extends Controller
     public function index(string $identifier): mixed
     {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
-        $mainTitle = 'Submit the data';
-        $importJob = $this->repository->find($identifier);
-        $flow      = $importJob->getFlow();
+        $mainTitle  = 'Submit the data';
+        $importJob  = $this->repository->find($identifier);
+        $flow       = $importJob->getFlow();
 
         if ('ready_for_submission' !== $importJob->getState()) {
             exit(sprintf('Job is in state "%s", expected ready_for_submission.', $importJob->getState()));
@@ -68,7 +68,7 @@ final class SubmitController extends Controller
         $jobBackUrl = route('data-conversion.index', [$identifier]);
 
         // validate flow
-        $enabled = config(sprintf('importer.providers.%s.enabled', $flow));
+        $enabled    = config(sprintf('importer.providers.%s.enabled', $flow));
         if (null === $enabled || false === $enabled) {
             throw new ImporterErrorException(sprintf('[c] Not a supported flow: "%s"', $flow));
         }
@@ -81,7 +81,7 @@ final class SubmitController extends Controller
     public function start(Request $request, string $identifier): JsonResponse
     {
         Log::debug(sprintf('Now at %s', __METHOD__));
-        $importJob = $this->repository->find($identifier);
+        $importJob   = $this->repository->find($identifier);
 
         // Retrieve authentication credentials for job
         $accessToken = SecretManager::getAccessToken();

@@ -42,9 +42,7 @@ final class CompletedConfiguration
      */
     public function __construct(
         public Configuration $configuration
-    )
-    {
-    }
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

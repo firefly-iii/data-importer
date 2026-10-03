@@ -34,9 +34,9 @@ final class AkahuDateRange
 
     public function __construct(Configuration $configuration)
     {
-        $tz            = config('app.timezone');
-        $dateNotBefore = null;
-        $dateNotAfter  = null;
+        $tz                  = config('app.timezone');
+        $dateNotBefore       = null;
+        $dateNotAfter        = null;
 
         if ('' !== $configuration->getDateNotBefore()) {
             $dateNotBefore = Carbon::parse($configuration->getDateNotBefore(), $tz);
