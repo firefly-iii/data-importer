@@ -86,8 +86,8 @@ final class FileContentSherlock
             Log::debug('CAMT.05x Check of content: positive');
 
             return 'camt';
-        } catch (Exception) {
-            Log::debug('CAMT.05x Check of content: negative');
+        } catch (Exception $e)  {
+            Log::debug(sprintf('CAMT.05x Check of content: negative: %s', $e->getMessage()));
         }
 
         return 'csv';
