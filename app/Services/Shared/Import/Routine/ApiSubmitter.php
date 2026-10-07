@@ -236,8 +236,8 @@ final class ApiSubmitter
                 ));
                 $message = sprintf(
                     '[a115]: There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">%s</a>, %s %s).',
-                    $field,
-                    $value,
+                    e($field),
+                    e($value),
                     $this->vanityURL,
                     $searchResult['id'],
                     e($searchResult['description']),
