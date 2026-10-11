@@ -373,13 +373,7 @@ final class TransactionTransformer
                 $this->pendingTransactionClusters[$clusterName]['descriptions'][] = $description;
                 ++$this->pendingTransactionClusters[$clusterName]['count'];
 
-                // debug entry because somehow $clusterName can be an integer at this point.
-                if(is_int($clusterName)) {
-                    Log::error(sprintf('Cluster name is an integer (%d) for description "%s", this should not happen.', $clusterName, $description));
-                    $clusterName = (string)$clusterName;
-                }
-
-                return $clusterName;
+                return (string) $clusterName;
             }
         }
 
