@@ -101,10 +101,7 @@ trait CreatesAccounts
             Log::error(sprintf('Existing account data not found for account "%s"', $importServiceId));
             $continue = false;
         }
-        $configuration   = [
-            'type' => null,
-            'currency' => null,
-        ];
+        $configuration   = ['type' => null, 'currency' => null];
         if (true === $continue) {
             // Prepare account creation configuration with defaults
             $configuration               = [
