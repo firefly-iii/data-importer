@@ -276,6 +276,7 @@ final class ImportJobRepository
         Log::debug(sprintf('Now in %s', __METHOD__));
         $accounts = [Constants::ASSET_ACCOUNTS => [], Constants::LIABILITIES => []];
         $url      = null;
+        $token = null;
 
         try {
             $url           = SecretManager::getBaseUrl();
