@@ -36,7 +36,7 @@ final class Transaction
     public string  $accountUid            = '';
     public string  $additionalInformation = '';
     public ?Carbon $bookingDate           = null;
-    public ?Carbon $transactionDate = null;
+    public ?Carbon $transactionDate       = null;
     public array   $creditorAddressLine   = [];
     public string  $creditorBban          = '';
     public string  $creditorIban          = '';
@@ -336,7 +336,7 @@ final class Transaction
             'currency_code'          => $this->currencyCode,
             'booking_date'           => $this->bookingDate?->toW3cString(),
             'value_date'             => $this->valueDate?->toW3cString(),
-            'transaction_date'         => $this->transactionDate?->toW3cString(),
+            'transaction_date'       => $this->transactionDate?->toW3cString(),
             'creditor_name'          => $this->creditorName,
             'creditor_iban'          => $this->creditorIban,
             'creditor_bban'          => $this->creditorBban,
