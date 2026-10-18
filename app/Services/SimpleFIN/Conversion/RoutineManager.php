@@ -159,11 +159,12 @@ final class RoutineManager implements RoutineManagerInterface
         // $accountTransactions now contains raw transaction data arrays (from SimpleFIN JSON)
 
         // The SimpleFIN response contains every account on the bridge, not only the requested ones.
-        $validIds = array_map('strval', $allAccountIds);
+        $validIds        = array_map('strval', $allAccountIds);
         foreach ($allTransactions as $importServiceAccountId => $transactions) {
             $importServiceAccountId  = (string) $importServiceAccountId;
             if (!in_array($importServiceAccountId, $validIds, true)) {
                 Log::debug(sprintf('Account "%s" skipped, skipping its %d transaction(s).', $importServiceAccountId, count($transactions)));
+
                 continue;
             }
 

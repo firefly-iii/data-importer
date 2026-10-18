@@ -10,9 +10,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - [PR 1431](https://github.com/firefly-iii/data-importer/pull/1431) (Add "akahu" to flow enum in v3 config schema) created by @Void4506
 - [Issue 12840](https://github.com/firefly-iii/firefly-iii/issues/12840) (Evidence pack: Enable Banking BBAN-only feeds never match own accounts) reported by @VladAdGad
 - [Issue 12896](https://github.com/firefly-iii/firefly-iii/issues/12896) (Unable to load a downloaded configuration file with data source Akahu) reported by @Void4506
-- #12926
-- #12974
-- #13031
+- [Issue 12926](https://github.com/firefly-iii/firefly-iii/issues/12926) (SimpleFIN conversion fails when account IDs contain only digits due to PHP array-key coercion - small change with solution (AI helped)) reported by @Grish-Lon
+- [Issue 12974](https://github.com/firefly-iii/firefly-iii/issues/12974) (SimpleFIN import converts accounts that are not in the configuration.) reported by @bandlaw12
+- [Issue 13031](https://github.com/firefly-iii/firefly-iii/issues/13031) (Importer crashes with SimpleFIN) reported by @JVorbeck
 
 ### Added
 
