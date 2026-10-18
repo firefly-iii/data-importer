@@ -120,7 +120,7 @@ final class GenerateTransactions
             'external_id'        => $entry->getTransactionId(),
             'internal_reference' => $entry->accountUid,
             'book_date'          => $entry->bookingDate instanceof Carbon ? $entry->bookingDate->toW3cString() : null,
-            'processing_date'    => $entry->valueDate instanceof Carbon ? $entry->valueDate->toW3cString() : null,
+            'process_date'    => $entry->valueDate instanceof Carbon ? $entry->valueDate->toW3cString() : null,
         ];
 
         if (1 === bccomp($entry->transactionAmount, '0')) {
