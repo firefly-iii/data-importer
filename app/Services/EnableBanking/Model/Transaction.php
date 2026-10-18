@@ -36,6 +36,7 @@ final class Transaction
     public string  $accountUid            = '';
     public string  $additionalInformation = '';
     public ?Carbon $bookingDate           = null;
+    public ?Carbon $transactionDate = null;
     public array   $creditorAddressLine   = [];
     public string  $creditorBban          = '';
     public string  $creditorIban          = '';
@@ -78,6 +79,9 @@ final class Transaction
         // Handle dates
         if (array_key_exists('booking_date', $array) && null !== $array['booking_date']) {
             $transaction->bookingDate = Carbon::parse($array['booking_date']);
+        }
+        if (array_key_exists('transaction_date', $array) && null !== $array['transaction_date']) {
+            $transaction->transactionDate = Carbon::parse($array['transaction_date']);
         }
         if (array_key_exists('value_date', $array) && null !== $array['value_date']) {
             $transaction->valueDate = Carbon::parse($array['value_date']);
@@ -203,6 +207,9 @@ final class Transaction
 
     public function getDate(): Carbon
     {
+        if ($this->transactionDate instanceof Carbon) {
+            return $this->transactionDate;
+        }
         if ($this->bookingDate instanceof Carbon) {
             return $this->bookingDate;
         }
@@ -329,6 +336,7 @@ final class Transaction
             'currency_code'          => $this->currencyCode,
             'booking_date'           => $this->bookingDate?->toW3cString(),
             'value_date'             => $this->valueDate?->toW3cString(),
+            'transaction_date'         => $this->transactionDate?->toW3cString(),
             'creditor_name'          => $this->creditorName,
             'creditor_iban'          => $this->creditorIban,
             'creditor_bban'          => $this->creditorBban,
