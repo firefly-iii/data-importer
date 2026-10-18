@@ -2,13 +2,24 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## v2.3.6 - 2026-09-28
+## v2.3.6 - 2026-10-18
 
 <!-- summary: In this release some tiny but important bugs were fixed for Enable Banking and Akahu -->
 
 ### Fixed
-- [Issue 12896](https://github.com/firefly-iii/firefly-iii/issues/12896) (Unable to load a downloaded configuration file with data source Akahu) reported by @Void4506
+- [PR 1431](https://github.com/firefly-iii/data-importer/pull/1431) (Add "akahu" to flow enum in v3 config schema) created by @Void4506
 - [Issue 12840](https://github.com/firefly-iii/firefly-iii/issues/12840) (Evidence pack: Enable Banking BBAN-only feeds never match own accounts) reported by @VladAdGad
+- [Issue 12896](https://github.com/firefly-iii/firefly-iii/issues/12896) (Unable to load a downloaded configuration file with data source Akahu) reported by @Void4506
+- #12926
+- #12974
+- #13031
+
+### Added
+
+- Expand Enable Banking import with new date fields.
+
+### Security
+- Fixed some unescaped data, reported by @router0mail
 
 ## v2.3.5 - 2026-09-23
 
