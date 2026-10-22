@@ -134,7 +134,7 @@ final class GenerateTransactions
         }
 
         $return['transactions'][] = $transaction;
-        Log::debug(sprintf('[%s] Parsed Enable Banking transaction "%s".', config('importer.version'), $entry->getTransactionId()));
+        Log::debug(sprintf('[%s] Parsed Enable Banking transaction "%s".', config('importer.version'), $entry->getTransactionId()), $return);
 
         return $return;
     }
@@ -181,6 +181,7 @@ final class GenerateTransactions
 
         if ('' !== (string) $sourceIban) {
             $transaction['source_iban'] = $sourceIban;
+            Log::debug(sprintf('Set source iban to "%s"', $sourceIban));
 
             // Check if IBAN is a match. Will overrule BBAN match.
             $match                      = array_key_exists($sourceIban, $this->targetAccounts) && array_key_exists($sourceIban, $this->targetTypes);
@@ -190,6 +191,7 @@ final class GenerateTransactions
                     Log::debug(sprintf('Matched source IBAN "%s" to account #%d AND it is an asset account.', $sourceIban, $this->targetAccounts[$sourceIban]));
                     $transaction['source_id'] = $this->targetAccounts[$sourceIban];
                     $transaction['type']      = 'transfer';
+                    Log::debug(sprintf('Set source ID to #%d and type to "transfer"', $transaction['source_id']));
                 }
                 if ('asset' !== $this->targetTypes[$sourceIban]) {
                     Log::debug(sprintf(
@@ -220,15 +222,19 @@ final class GenerateTransactions
         Log::debug('appendNegativeAmountInfo');
         $transaction['amount']    = bcmul($entry->transactionAmount, '-1');
         $transaction['source_id'] = (int) $this->accounts[$accountUid];
+        Log::debug(sprintf('Source ID is now #%d', $transaction['source_id']));
 
         // Set destination info
         $destName                 = $entry->getDestinationName();
+        Log::debug(sprintf('Destination name is now "%s"', $destName));
         if ($this->configuration->isUseEntireOpposingAddress()) {
             $destName = $entry->getDestinationNameWithAddress();
+            Log::debug(sprintf('Destination name is now "%s"', $destName));
         }
         $destIban                 = $entry->getDestinationIban();
         $destBban                 = $entry->getDestinationBban();
         $bbanKey                  = sprintf('nr_%s', $destBban);
+        Log::debug(sprintf('Destination iban is "%s", destination bban is "%s"', $destIban, $destBban));
 
         if ('' !== (string) $destBban) {
             // check if BBAN is a match (in case there is an IBAN in the BBAN field).
@@ -243,6 +249,7 @@ final class GenerateTransactions
                     ));
                     $transaction['destination_id'] = $this->targetAccounts[$bbanKey];
                     $transaction['type']           = 'transfer';
+                    Log::debug(sprintf('Set destination ID to #%d and type to "transfer".', $transaction['destination_id']));
                 }
                 if ('asset' !== $this->targetTypes[$bbanKey]) {
                     Log::debug(sprintf(
@@ -261,6 +268,7 @@ final class GenerateTransactions
         // Check if IBAN is a match, will overrule BBAN.
         if ('' !== (string) $destIban) {
             $transaction['destination_iban'] = $destIban;
+            Log::debug(sprintf('Set destination iban to "%s"', $destIban));
             $match                           = array_key_exists($destIban, $this->targetAccounts) && array_key_exists($destIban, $this->targetTypes);
             if ($match) {
                 Log::debug(sprintf('Matched source IBAN "%s" to account #%d', $destIban, $this->targetAccounts[$destIban]));
@@ -290,9 +298,11 @@ final class GenerateTransactions
 
         if (null !== $destName) {
             $transaction['destination_name'] = $destName;
+            Log::debug(sprintf('Set destination name to "%s"', $destName));
         }
         if (null === $destName && (!array_key_exists('destination_id', $transaction) || null === $transaction['destination_id'])) {
             $transaction['destination_name'] = '(unknown destination)';
+            Log::debug('Set destination name to(!) "(unknown destination)"');
         }
 
         return $transaction;
