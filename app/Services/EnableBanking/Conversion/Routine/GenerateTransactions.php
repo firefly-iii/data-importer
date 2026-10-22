@@ -221,12 +221,12 @@ final class GenerateTransactions
         $transaction                   = $this->positiveTransactionSafetyCatch($transaction, (string) $entry->getSourceName(), (string) $entry->getSourceIban());
 
         Log::debug(sprintf(
-                       'destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"',
-                       $transaction['destination_id'] ?? '',
-                       $transaction['source_name'] ?? '',
-                       $transaction['source_iban'] ?? '',
-                       $transaction['source_id'] ?? ''
-                   ));
+            'destination_id = %d, source_name = "%s", source_iban = "%s", source_id = "%s"',
+            $transaction['destination_id'] ?? '',
+            $transaction['source_name'] ?? '',
+            $transaction['source_iban'] ?? '',
+            $transaction['source_id'] ?? ''
+        ));
 
         return $transaction;
     }
@@ -324,12 +324,12 @@ final class GenerateTransactions
         $transaction              = $this->negativeTransactionSafetyCatch($transaction, (string) $entry->getDestinationName(), (string) $entry->getDestinationIban());
 
         Log::debug(sprintf(
-                       'source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"',
-                       $transaction['source_id'],
-                       $transaction['destination_id'] ?? '',
-                       $transaction['destination_name'] ?? '',
-                       $transaction['destination_iban'] ?? ''
-                   ));
+            'source_id = %d, destination_id = "%s", destination_name = "%s", destination_iban = "%s"',
+            $transaction['source_id'],
+            $transaction['destination_id'] ?? '',
+            $transaction['destination_name'] ?? '',
+            $transaction['destination_iban'] ?? ''
+        ));
 
         return $transaction;
     }
