@@ -64,8 +64,8 @@ declare(strict_types=1);
  */
 
 return [
-    'version'                       => 'develop/2026-10-21',
-    'build_time'                    => 1792608238,
+    'version'                       => 'develop/2026-10-22',
+    'build_time'                    => 1792681916,
     'fake_data'                     => env('FAKE_DATA', false),
     'store_fake_data'               => env('STORE_FAKE_DATA', false),
     'stackable_fields'              => ['description', 'notes', 'note'],

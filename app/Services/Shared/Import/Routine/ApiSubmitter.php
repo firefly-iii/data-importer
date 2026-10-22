@@ -506,9 +506,11 @@ final class ApiSubmitter
                 }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
             }
+
             return $line;
         }
         Log::debug('Configuration has NO mapping, nothing was changed.');
+
         return $line;
     }
 
