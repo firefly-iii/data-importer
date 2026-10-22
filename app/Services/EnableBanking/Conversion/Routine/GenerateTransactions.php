@@ -145,6 +145,7 @@ final class GenerateTransactions
         $transaction['type']           = 'deposit';
         $transaction['amount']         = $entry->transactionAmount;
         $transaction['destination_id'] = (int) $this->accounts[$accountUid];
+        Log::debug(sprintf('Destination ID is now #%d', $transaction['destination_id']));
 
         // Set source info
         $sourceName                    = $entry->getSourceName();
@@ -164,6 +165,7 @@ final class GenerateTransactions
                     $transaction['source_id'] = $this->targetAccounts[$bbanKey];
                     $transaction['type']      = 'transfer';
                     Log::debug(sprintf('Matched source BBAN "nr_%s" to account #%d AND it is an asset account.', $sourceBban, $this->targetAccounts[$bbanKey]));
+                    Log::debug(sprintf('Set source ID to #%d and type to "transfer"', $transaction['source_id']));
                 }
                 if ('asset' !== $this->targetTypes[$bbanKey]) {
                     Log::debug(sprintf(
@@ -281,7 +283,9 @@ final class GenerateTransactions
                     ));
                     $transaction['destination_id'] = $this->targetAccounts[$destIban];
                     $transaction['type']           = 'transfer';
+                    Log::debug(sprintf('Set destination ID to #%d and type to "transfer".', $transaction['destination_id']));
                 }
+
                 if ('asset' !== $this->targetTypes[$destIban]) {
                     Log::debug(sprintf(
                         'Matched source IBAN "%s" to account #%d BUT its a "%s" so ignore',

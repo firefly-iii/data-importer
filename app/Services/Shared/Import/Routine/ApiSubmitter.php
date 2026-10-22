@@ -488,7 +488,7 @@ final class ApiSubmitter
                         unset($transaction['destination_name'], $transaction['destination_iban']);
 
                         $transaction['destination_id'] = $this->mapping[0][$destination];
-                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d', $destination, $this->mapping[0][$destination]));
+                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d (destination_id)', $destination, $this->mapping[0][$destination]));
                     }
                 }
                 if ('deposit' === $transaction['type']) {
@@ -498,7 +498,7 @@ final class ApiSubmitter
                         unset($transaction['source_name'], $transaction['source_iban']);
 
                         $transaction['source_id'] = $this->mapping[0][$source];
-                        Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d', $source, $this->mapping[0][$source]));
+                        Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d (source_id)', $source, $this->mapping[0][$source]));
                     }
                 }
                 if ('' === trim((string) ($transaction['description'] ?? ''))) {
