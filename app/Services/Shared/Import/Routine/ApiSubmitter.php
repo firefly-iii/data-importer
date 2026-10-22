@@ -488,7 +488,11 @@ final class ApiSubmitter
                         unset($transaction['destination_name'], $transaction['destination_iban']);
 
                         $transaction['destination_id'] = $this->mapping[0][$destination];
-                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d (destination_id)', $destination, $this->mapping[0][$destination]));
+                        Log::debug(sprintf(
+                            'Replaced destination name "%s" with a reference to account id #%d (destination_id)',
+                            $destination,
+                            $this->mapping[0][$destination]
+                        ));
                     }
                 }
                 if ('deposit' === $transaction['type']) {
