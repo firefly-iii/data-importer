@@ -73,6 +73,7 @@ return [
     'field_entryDetailUuidEndToEndReference'                                               => 'UUID End To End Identification',
     'field_entryDetailRemittanceInformationUnstructuredBlockMessage'                       => 'Unstructured Message',
     'field_entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => 'Structured Message',
+    'field_entryDetailPaymentProcessorName' => 'Payment processor name',
 
     // explanations
     'field_statementCreationDate_description' => 'This date may refer to the creation date of the file, not of any transactions.',

@@ -40,6 +40,7 @@ use Genkgo\Camt\DTO\Message;
 use Genkgo\Camt\DTO\OtherAccount;
 use Genkgo\Camt\DTO\ProprietaryAccount;
 use Genkgo\Camt\DTO\RelatedParty;
+use Genkgo\Camt\DTO\UltimateCreditor;
 use Genkgo\Camt\DTO\UnstructuredRemittanceInformation;
 use Genkgo\Camt\DTO\UPICAccount;
 use Illuminate\Support\Facades\Log;
@@ -51,10 +52,10 @@ abstract class AbstractTransaction
 {
     public const TIME_FORMAT = 'Y-m-d H:i:s';
 
-    protected Message $levelA;
+    protected Message          $levelA;
     protected Report|Statement $levelB;
-    protected Entry $levelC;
-    protected array $levelD;
+    protected Entry            $levelC;
+    protected array            $levelD;
 
     final public function countSplits(): int
     {
@@ -63,12 +64,12 @@ abstract class AbstractTransaction
 
     public function getCurrencyCode(int $index): string
     {
-        return (string) $this->levelC->getAmount()->getCurrency()->getCode();
+        return (string)$this->levelC->getAmount()->getCurrency()->getCode();
     }
 
     public function getAmount(int $index): string
     {
-        return (string) $this->getDecimalAmount($this->levelC->getAmount());
+        return (string)$this->getDecimalAmount($this->levelC->getAmount());
     }
 
     private function getDecimalAmount(?Money $money): string
@@ -85,7 +86,7 @@ abstract class AbstractTransaction
     public function getDate(int $index): string
     {
         // FIXME loop level D for the date that belongs to the index
-        return (string) $this->levelC->getValueDate()->format(self::TIME_FORMAT);
+        return (string)$this->levelC->getValueDate()->format(self::TIME_FORMAT);
     }
 
     /**
@@ -104,25 +105,25 @@ abstract class AbstractTransaction
                 // end temporary debug message
                 throw new ImporterErrorException(sprintf('Unknown field "%s" in getFieldByIndex(%d)', $field, $index));
 
-                // LEVEL A
+            // LEVEL A
             case 'messageId':
                 // always the same, since its level A.
-                return (string) $this->levelA->getGroupHeader()->getMessageId();
+                return (string)$this->levelA->getGroupHeader()->getMessageId();
 
-                // LEVEL B
+            // LEVEL B
             case 'statementId':
                 // always the same, since its level B.
-                return (string) $this->levelB->getId();
+                return (string)$this->levelB->getId();
 
             case 'statementCreationDate':
                 // always the same, since its level B.
-                return (string) $this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
+                return (string)$this->levelB->getCreatedOn()->format(self::TIME_FORMAT);
 
             case 'CdtDbtInd':
                 /** @var null|EntryTransactionDetail $set */
-                $set             = $this->levelD[$index];
+                $set = $this->levelD[$index];
 
-                return (string) $set?->getCreditDebitIndicator();
+                return (string)$set?->getCreditDebitIndicator();
 
             case 'statementAccountIban':
                 if (IbanAccount::class === $this->levelB->getAccount()::class) {
@@ -133,8 +134,8 @@ abstract class AbstractTransaction
 
             case 'statementAccountNumber':
                 // always the same, since its level B.
-                $list            = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
-                $class           = $this->levelB->getAccount()::class;
+                $list  = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
+                $class = $this->levelB->getAccount()::class;
                 if (in_array($class, $list, true)) {
                     return $this->levelB->getAccount()->getIdentification();
                 }
@@ -144,68 +145,68 @@ abstract class AbstractTransaction
 
             case 'entryAccountServicerReference':
                 // always the same, since its level C.
-                return (string) $this->levelC->getAccountServicerReference();
+                return (string)$this->levelC->getAccountServicerReference();
 
             case 'entryReference':
                 // always the same, since its level C.
-                return (string) $this->levelC->getReference();
+                return (string)$this->levelC->getReference();
 
             case 'entryAdditionalInfo':
                 // always the same, since its level C.
-                return (string) $this->levelC->getAdditionalInfo();
+                return (string)$this->levelC->getAdditionalInfo();
 
             case 'entryAmount':
                 // always the same, since its level C.
-                return (string) $this->getDecimalAmount($this->levelC->getAmount());
+                return (string)$this->getDecimalAmount($this->levelC->getAmount());
 
             case 'entryAmountCurrency':
                 // always the same, since its level C.
-                return (string) $this->levelC->getAmount()->getCurrency()->getCode();
+                return (string)$this->levelC->getAmount()->getCurrency()->getCode();
 
             case 'entryValueDate':
                 // always the same, since its level C.
-                return (string) $this->levelC->getValueDate()?->format(self::TIME_FORMAT);
+                return (string)$this->levelC->getValueDate()?->format(self::TIME_FORMAT);
 
             case 'entryBookingDate':
                 // always the same, since its level C.
-                return (string) $this->levelC->getBookingDate()?->format(self::TIME_FORMAT);
+                return (string)$this->levelC->getBookingDate()?->format(self::TIME_FORMAT);
 
             case 'entryBtcDomainCode':
                 // always the same, since its level C.
                 if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
-                    return (string) $this->levelC->getBankTransactionCode()->getDomain()->getCode();
+                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
                 }
 
                 return '';
 
             case 'entryBtcFamilyCode':
-                $return          = '';
+                $return = '';
                 // always the same, since its level C.
                 if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
-                    $return = (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    $return = (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
                 return '';
 
             case 'entryBtcSubFamilyCode':
-                $return          = '';
+                $return = '';
                 // always the same, since its level C.
                 if ($this->levelC->getBankTransactionCode()->getDomain() instanceof DomainBankTransactionCode) {
-                    return (string) $this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
 
-                // LEVEL D
+            // LEVEL D
             case 'entryDetailAccountServicerReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return '';
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
 
-                return (string) $info?->getReference()?->getAccountServicerReference();
+                return (string)$info?->getReference()?->getAccountServicerReference();
 
             case 'entryDetailEndToEndId':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
@@ -213,9 +214,9 @@ abstract class AbstractTransaction
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
 
-                return (string) $info?->getReference()?->getEndToEndId();
+                return (string)$info?->getReference()?->getEndToEndId();
 
             case 'entryDetailUuidEndToEndReference':
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
@@ -223,12 +224,12 @@ abstract class AbstractTransaction
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
 
-                return (string) $info?->getReference()?->getUuidEndToEndReference();
+                return (string)$info?->getReference()?->getUuidEndToEndReference();
 
             case 'entryDetailRemittanceInformationUnstructuredBlockMessage':
-                $result          = '';
+                $result = '';
 
                 // this is level D, so grab from level C or loop.
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
@@ -239,7 +240,7 @@ abstract class AbstractTransaction
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
 
                 if (null !== $info->getRemittanceInformation()) {
                     $unstructured = $info->getRemittanceInformation()->getUnstructuredBlocks();
@@ -260,7 +261,7 @@ abstract class AbstractTransaction
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index]; // FIXME, check if always readable or if we need some checks like with "unstructuredBlockMessage"
+                $info = $this->levelD[$index]; // FIXME, check if always readable or if we need some checks like with "unstructuredBlockMessage"
 
                 // like the unstructured block, these could be multiple blocks, so loop:
                 if (null !== $info->getRemittanceInformation() && count($info->getRemittanceInformation()->getStructuredBlocks()) > 0) {
@@ -270,7 +271,7 @@ abstract class AbstractTransaction
                     }
 
                     // #8994 add info.
-                    $string = (string) $info->getRemittanceInformation()?->getCreditorReferenceInformation()?->getRef();
+                    $string = (string)$info->getRemittanceInformation()?->getCreditorReferenceInformation()?->getRef();
                     if ('' !== $string) {
                         return sprintf('%s %s', $return, $string);
                     }
@@ -289,7 +290,7 @@ abstract class AbstractTransaction
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
 
                 return $this->getDecimalAmount($info->getAmount());
 
@@ -302,61 +303,61 @@ abstract class AbstractTransaction
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
 
-                return (string) $info->getAmount()?->getCurrency()?->getCode();
+                return (string)$info->getAmount()?->getCurrency()?->getCode();
 
             case 'entryDetailBtcDomainCode':
                 // this is level D, so grab from level C or loop.
-                $return          = '';
+                $return = '';
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     // return (string)$this->levelC->getBankTransactionCode()->getDomain()->getCode();
                     return $return; // config.-depending fallback handled in mapping
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    return (string) $info->getBankTransactionCode()->getDomain()->getCode();
+                    return (string)$info->getBankTransactionCode()->getDomain()->getCode();
                 }
 
                 return $return;
 
             case 'entryDetailBtcFamilyCode':
                 // this is level D, so grab from level C or loop.
-                $return          = '';
+                $return = '';
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     // return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                     return $return; // config.-depending fallback handled in mapping
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    return (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
+                    return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getCode();
                 }
 
                 return $return;
 
             case 'entryDetailBtcSubFamilyCode':
                 // this is level D, so grab from level C or loop.
-                $return          = '';
+                $return = '';
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     // return (string)$this->levelC->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                     return $return; // config.-depending fallback handled in mapping
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
+                $info = $this->levelD[$index];
                 if (null !== $info->getBankTransactionCode()->getDomain()) {
-                    return (string) $info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
+                    return (string)$info->getBankTransactionCode()->getDomain()->getFamily()->getSubFamilyCode();
                 }
 
                 return $return;
 
             case 'entryDetailOpposingAccountIban':
                 Log::debug('Now at entryDetailOpposingAccountIban');
-                $result          = '';
+                $result = '';
 
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     Log::debug('There is no info for field "entryDetailOpposingAccountIban", return blank');
@@ -365,7 +366,7 @@ abstract class AbstractTransaction
                 }
 
                 /** @var null|EntryTransactionDetail $info */
-                $info            = $this->levelD[$index] ?? null;
+                $info = $this->levelD[$index] ?? null;
                 if (null !== $info) {
                     Log::debug('Found info.');
                     $opposingAccount = $this->getOpposingParty($info)?->getAccount();
@@ -376,7 +377,7 @@ abstract class AbstractTransaction
                     }
 
                     if (is_object($opposingAccount) && IbanAccount::class === $opposingAccount::class) {
-                        $result = (string) $opposingAccount->getIdentification();
+                        $result = (string)$opposingAccount->getIdentification();
                         Log::debug(sprintf('Found account for entryDetailOpposingAccountIban: "%s"', $result));
                     }
                 }
@@ -387,9 +388,9 @@ abstract class AbstractTransaction
                 return $result;
 
             case 'entryDetailOpposingAccountNumber':
-                $result          = '';
+                $result = '';
 
-                $list            = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
+                $list = [OtherAccount::class, ProprietaryAccount::class, UPICAccount::class, BBANAccount::class];
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return $result;
                 }
@@ -399,26 +400,51 @@ abstract class AbstractTransaction
                 $opposingAccount = $this->getOpposingParty($info)?->getAccount();
                 $class           = $opposingAccount instanceof Account ? $opposingAccount::class : '';
                 if (in_array($class, $list, true)) {
-                    return (string) $opposingAccount->getIdentification();
+                    return (string)$opposingAccount->getIdentification();
                 }
 
                 return $result;
 
             case 'entryDetailOpposingName':
-                $result          = '';
+                $result = '';
 
                 if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
                     return $result;
                 }
 
                 /** @var EntryTransactionDetail $info */
-                $info            = $this->levelD[$index];
-                $opposingParty   = $this->getOpposingParty($info);
-                if (!$opposingParty instanceof RelatedParty) {
-                    Log::debug('In entryDetailOpposingName, opposing party is NULL, return "".');
+                $info   = $this->levelD[$index];
+                $result = $this->getUltimateCreditor($info);
+                if ('' === $result) {
+                    $opposingParty = $this->getOpposingParty($info);
+                    if (!$opposingParty instanceof RelatedParty) {
+                        Log::debug('In entryDetailOpposingName, opposing party is NULL, return "".');
+                    }
+                    if ($opposingParty instanceof RelatedParty) {
+                        return $this->getOpposingName($opposingParty);
+                    }
                 }
-                if ($opposingParty instanceof RelatedParty) {
-                    return $this->getOpposingName($opposingParty);
+
+                return $result;
+            case 'entryDetailPaymentProcessorName':
+                $result = '';
+
+                if (0 === count($this->levelD) || !array_key_exists($index, $this->levelD)) {
+                    return $result;
+                }
+
+                /** @var EntryTransactionDetail $info */
+                $info   = $this->levelD[$index];
+                $result = $this->getUltimateCreditor($info);
+                // if there is an ultimate creditor, return "entryDetailOpposingName"
+                if ('' !== $result) {
+                    $opposingParty = $this->getOpposingParty($info);
+                    if (!$opposingParty instanceof RelatedParty) {
+                        Log::debug('In entryDetailPaymentProcessorName, opposing party is NULL, return "".');
+                    }
+                    if ($opposingParty instanceof RelatedParty) {
+                        return $this->getOpposingName($opposingParty);
+                    }
                 }
 
                 return $result;
@@ -436,7 +462,7 @@ abstract class AbstractTransaction
         Log::debug(sprintf('Found %d related parties.', count($relatedParties)));
 
         // get amount from "getAmount":
-        $amount                   = $transactionDetail?->getAmount()?->getAmount();
+        $amount = $transactionDetail?->getAmount()?->getAmount();
         if (null !== $amount) {
             Log::debug(sprintf('Amount in getAmount() is "%s"', $amount));
         }
@@ -481,11 +507,11 @@ abstract class AbstractTransaction
     {
         $opposingName = '';
         // FIXME make depend on configuration
-        if ('' === (string) $relatedParty->getRelatedPartyType()->getName()) {
+        if ('' === (string)$relatedParty->getRelatedPartyType()->getName()) {
             // there is no "name", so use the address instead
             $opposingName = $this->generateAddressLine($relatedParty->getRelatedPartyType()->getAddress());
         }
-        if ('' !== (string) $relatedParty->getRelatedPartyType()->getName()) {
+        if ('' !== (string)$relatedParty->getRelatedPartyType()->getName()) {
             // there is a name
             $opposingName = $relatedParty->getRelatedPartyType()->getName();
 
@@ -497,6 +523,20 @@ abstract class AbstractTransaction
         }
 
         return $opposingName;
+    }
+
+    private function getUltimateCreditor(EntryTransactionDetail $info): string
+    {
+        Log::debug('Found info.');
+        $relatedParties = $info->getRelatedParties();
+
+        /** @var RelatedParty $party */
+        foreach ($relatedParties as $party) {
+            if ($party->getRelatedPartyType() instanceof UltimateCreditor) {
+                return (string)$party->getRelatedPartyType()?->getName();
+            }
+        }
+        return '';
     }
 
     private function generateAddressLine(?Address $address = null): string

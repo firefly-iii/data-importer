@@ -520,7 +520,13 @@ return [
             'mappable'     => false,
             'level'        => 'D',
         ],
-
+        'entryDetailPaymentProcessorName' => [
+            'title'        => 'entryDetailPaymentProcessorName',
+            'default_role' => 'note',
+            'roles'        => 'meta',
+            'mappable'     => false,
+            'level'        => 'D',
+        ],
         'entryDetailOpposingAccountIban'                                                 => [
             'title'        => 'entryDetailOpposingAccountIban',
             'default_role' => 'opposing-iban',

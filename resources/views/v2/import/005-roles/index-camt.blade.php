@@ -71,7 +71,12 @@
                                     @foreach($level['fields'] as $field)
                                         @if(true === ($field['section'] ?? false))
                                                 <tr>
-                                                    <th colspan="4">{{ __('camt.section_'. $field['title']) }}</th>
+                                                    <th colspan="4">
+                                                        {{ __('camt.section_'. $field['title']) }}
+                                                        @if('' !== $field['description'])
+                                                            <br><span class="text-muted">{{ $field['description'] }}</span>
+                                                        @endif
+                                                    </th>
                                                 </tr>
                                             @endif
                                         @if(false === ($field['section'] ?? false))
