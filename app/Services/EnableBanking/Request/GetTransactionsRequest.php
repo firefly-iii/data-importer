@@ -45,12 +45,12 @@ final class GetTransactionsRequest extends Request
     public function __construct(string $url, string $accountUid, string $accountIdentificationHash, ?string $dateFrom = null, ?string $dateTo = null)
     {
         $this->setBase($url);
-        $this->accountUid   = $accountUid;
+        $this->accountUid                = $accountUid;
         $this->accountIdentificationHash = $accountIdentificationHash;
-        $this->fakeDataPath = storage_path(sprintf('fake-data/eb-transactions-%s.json', $accountUid));
+        $this->fakeDataPath              = storage_path(sprintf('fake-data/eb-transactions-%s.json', $accountUid));
 
-        $urlPath            = sprintf('accounts/%s/transactions', $accountUid);
-        $params             = [];
+        $urlPath                         = sprintf('accounts/%s/transactions', $accountUid);
+        $params                          = [];
         if (null !== $dateFrom) {
             $params['date_from'] = $dateFrom;
             $this->fakeDataPath  = storage_path(sprintf('fake-data/eb-transactions-%s-%s.json', $accountUid, $dateFrom));

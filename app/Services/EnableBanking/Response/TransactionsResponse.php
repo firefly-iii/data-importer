@@ -42,7 +42,7 @@ final class TransactionsResponse extends Response implements Countable, Iterator
     private array  $data                      = [];
 
     /** @var Transaction[] */
-    private array $transactions = [];
+    private array $transactions               = [];
 
     public function __construct(array $data = [])
     {
@@ -102,9 +102,9 @@ final class TransactionsResponse extends Response implements Countable, Iterator
                 $tx['account_uid']                 = $this->accountUid;
                 $tx['account_identification_hash'] = $this->accountIdentificationHash;
                 // Map Enable Banking status values: BOOK -> booked, PDNG -> pending
-                $status               = $tx['status'] ?? 'BOOK';
-                $tx['status']         = 'BOOK' === $status ? 'booked' : 'pending';
-                $this->transactions[] = Transaction::fromArray($tx);
+                $status                            = $tx['status'] ?? 'BOOK';
+                $tx['status']                      = 'BOOK' === $status ? 'booked' : 'pending';
+                $this->transactions[]              = Transaction::fromArray($tx);
             }
         }
     }

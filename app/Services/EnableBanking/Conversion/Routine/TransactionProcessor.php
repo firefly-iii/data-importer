@@ -86,15 +86,17 @@ final class TransactionProcessor
         $index           = 1;
 
         foreach ($accounts as $accountUid => $destinationId) {
-            $serviceAccount = null;
+            $serviceAccount      = null;
+
             /** @var Account $current */
-            foreach($serviceAccounts as $current) {
-                if($current->getUid() === $accountUid) {
+            foreach ($serviceAccounts as $current) {
+                if ($current->getUid() === $accountUid) {
                     $serviceAccount = $current;
+
                     break;
                 }
             }
-            if(null === $serviceAccount) {
+            if (null === $serviceAccount) {
                 throw new ImporterErrorException(sprintf('No service account found for account UID "%s"', $accountUid));
             }
 
