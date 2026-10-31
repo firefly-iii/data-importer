@@ -161,6 +161,7 @@ final class RoutineManager implements RoutineManagerInterface
 
         return false;
     }
+
     private function hasEnableBankingError(): bool
     {
         Log::debug('Check if EnableBanking had an error before we complain about not having transactions.');
@@ -169,11 +170,13 @@ final class RoutineManager implements RoutineManagerInterface
             foreach ($array as $error) {
                 if (str_contains($error, 'eb001') || str_contains($error, 'eb002')) {
                     Log::warning('EnableBanking had download error (eb001 or eb002).');
+
                     return true;
                 }
             }
         }
         Log::debug('EnableBanking had no download error for this account.');
+
         return false;
     }
 
