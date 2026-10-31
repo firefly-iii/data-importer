@@ -161,12 +161,12 @@ final class RoleController extends Controller
                 'entryAccountServicerReference' => config('camt.fields.entryAccountServicerReference'),
                 'entryReference'                => config('camt.fields.entryReference'),
                 'entryAdditionalInfo'           => config('camt.fields.entryAdditionalInfo'),
-                'section_transaction'           => ['section' => true, 'title' => 'transaction','description' => '',],
+                'section_transaction'           => ['section' => true, 'title' => 'transaction', 'description' => ''],
                 'entryAmount'                   => config('camt.fields.entryAmount'),
                 'entryAmountCurrency'           => config('camt.fields.entryAmountCurrency'),
                 'entryValueDate'                => config('camt.fields.entryValueDate'),
                 'entryBookingDate'              => config('camt.fields.entryBookingDate'),
-                'section_btc'                   => ['section' => true, 'title' => 'Btc','description' => '',],
+                'section_btc'                   => ['section' => true, 'title' => 'Btc', 'description' => ''],
                 'entryBtcDomainCode'            => config('camt.fields.entryBtcDomainCode'),
                 'entryBtcFamilyCode'            => config('camt.fields.entryBtcFamilyCode'),
                 'entryBtcSubFamilyCode'         => config('camt.fields.entryBtcSubFamilyCode'),
@@ -185,22 +185,29 @@ final class RoleController extends Controller
                     'entryDetailAccountServicerReference'                                            => config('camt.fields.entryDetailAccountServicerReference'),
                     'entryDetailEndToEndId'                                                          => config('camt.fields.entryDetailEndToEndId'),
                     'entryDetailUuidEndToEndReference'                                               => config('camt.fields.entryDetailUuidEndToEndReference'),
-                    'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config('camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'),
-                    'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config('camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'),
-                    'section_tr'                                                                     => ['section' => true, 'title' => 'transaction','description' => '',],
+                    'entryDetailRemittanceInformationUnstructuredBlockMessage'                       => config(
+                        'camt.fields.entryDetailRemittanceInformationUnstructuredBlockMessage'
+                    ),
+                    'entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation' => config(
+                        'camt.fields.entryDetailRemittanceInformationStructuredBlockAdditionalRemittanceInformation'
+                    ),
+                    'section_tr'                                                                     => ['section' => true, 'title' => 'transaction', 'description' => ''],
                     'entryDetailAmount'                                                              => config('camt.fields.entryDetailAmount'),
                     'entryDetailAmountCurrency'                                                      => config('camt.fields.entryDetailAmountCurrency'),
-                    'section_btc'                                                                    => ['section' => true, 'title' => 'Btc','description' => '',],
+                    'section_btc'                                                                    => ['section' => true, 'title' => 'Btc', 'description' => ''],
                     'entryDetailBtcDomainCode'                                                       => config('camt.fields.entryDetailBtcDomainCode'),
                     'entryDetailBtcFamilyCode'                                                       => config('camt.fields.entryDetailBtcFamilyCode'),
                     'entryDetailBtcSubFamilyCode'                                                    => config('camt.fields.entryDetailBtcSubFamilyCode'),
-                    'section_opposing'                                                               => ['section' => true, 'title' => 'opposingPart','description' => 'If the CAMT file contains ultimate creditor data, this will be provided in the Opposing Name field, and the processor data will be in the payment processor field.' ,],
+                    'section_opposing'                                                               => [
+                        'section'     => true,
+                        'title'       => 'opposingPart',
+                        'description' => 'If the CAMT file contains ultimate creditor data, this will be provided in the Opposing Name field, and the processor data will be in the payment processor field.',
+                    ],
                     // payment processor entryDetailPaymentProcessorName
-                    'entryDetailPaymentProcessorName' => config('camt.fields.entryDetailPaymentProcessorName'),
+                    'entryDetailPaymentProcessorName'                                                => config('camt.fields.entryDetailPaymentProcessorName'),
                     'entryDetailOpposingAccountIban'                                                 => config('camt.fields.entryDetailOpposingAccountIban'),
                     'entryDetailOpposingAccountNumber'                                               => config('camt.fields.entryDetailOpposingAccountNumber'),
                     'entryDetailOpposingName'                                                        => config('camt.fields.entryDetailOpposingName'),
-
                 ],
             ];
         }
