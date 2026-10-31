@@ -442,10 +442,24 @@ abstract class AbstractTransaction
         }
         if (null === $amount) {
             $amount = $transactionDetail->getAmountDetails()?->getAmount();
-            Log::debug(sprintf('Amount in getAmountDetails() is "%s"', $amount));
+            Log::debug(sprintf('NULL Amount in getAmountDetails() is "%s"', $amount));
         }
+        // still NULL? Should try getAmountDetails()->getInstructedAmount()->getAmount()
+        // but get instructed amount does not exist, so go back to the parent and grab it there.
+        if (null === $amount) {
+            $this->levelA->getEntries()->rewind();
+            /** @var Entry $entry */
+            foreach($this->levelA->getEntries() as $entry) {
+                 $amount = $entry->getAmount()?->getAmount();
 
-        if (null !== $amount && '' !== $amount && $amount > 0) { // which part in this array is the interesting one?
+                 // temp, let's force this amount to be reversed pos/neg and see what happens.
+                if (null !== $amount) {
+                    $amount = bcmul($amount, '-1');
+                }
+            }
+        }
+        Log::debug(sprintf('Final amount is "%s"', $amount));
+        if (null !== $amount && '' !== $amount && 1 === bccomp($amount, '0')) { // which part in this array is the interesting one?
             Log::debug('getOpposingParty(), interested in Debtor!');
             $targetRelatedPartyObject = Debtor::class;
         }
