@@ -37,8 +37,9 @@ use Traversable;
  */
 final class TransactionsResponse extends Response implements Countable, IteratorAggregate
 {
-    private string $accountUid  = '';
-    private array  $data        = [];
+    private string $accountUid                = '';
+    private string $accountIdentificationHash = '';
+    private array  $data                      = [];
 
     /** @var Transaction[] */
     private array $transactions = [];
@@ -50,10 +51,11 @@ final class TransactionsResponse extends Response implements Countable, Iterator
         $this->data = $data;
     }
 
-    public static function fromArray(array $array, string $accountUid = ''): self
+    public static function fromArray(array $array, string $accountUid = '', string $accountIdentificationHash = ''): self
     {
-        $response             = new self($array);
-        $response->accountUid = $accountUid;
+        $response                            = new self($array);
+        $response->accountUid                = $accountUid;
+        $response->accountIdentificationHash = $accountIdentificationHash;
         $response->appendResponse($array);
 
         return $response;
@@ -79,15 +81,17 @@ final class TransactionsResponse extends Response implements Countable, Iterator
             Log::debug(sprintf('TransactionsResponse: nested format with %d booked, %d pending transactions', count($booked), count($pending)));
 
             foreach ($booked as $tx) {
-                $tx['account_uid']    = $this->accountUid;
-                $tx['status']         = 'booked';
-                $this->transactions[] = Transaction::fromArray($tx);
+                $tx['account_uid']                 = $this->accountUid;
+                $tx['account_identification_hash'] = $this->accountIdentificationHash;
+                $tx['status']                      = 'booked';
+                $this->transactions[]              = Transaction::fromArray($tx);
             }
 
             foreach ($pending as $tx) {
-                $tx['account_uid']    = $this->accountUid;
-                $tx['status']         = 'pending';
-                $this->transactions[] = Transaction::fromArray($tx);
+                $tx['account_uid']                 = $this->accountUid;
+                $tx['account_identification_hash'] = $this->accountIdentificationHash;
+                $tx['status']                      = 'pending';
+                $this->transactions[]              = Transaction::fromArray($tx);
             }
         }
         if (!array_key_exists('booked', $transactions) && !array_key_exists('pending', $transactions)) {
@@ -95,7 +99,8 @@ final class TransactionsResponse extends Response implements Countable, Iterator
             Log::debug(sprintf('TransactionsResponse: flat format with %d transactions', count($transactions)));
 
             foreach ($transactions as $tx) {
-                $tx['account_uid']    = $this->accountUid;
+                $tx['account_uid']                 = $this->accountUid;
+                $tx['account_identification_hash'] = $this->accountIdentificationHash;
                 // Map Enable Banking status values: BOOK -> booked, PDNG -> pending
                 $status               = $tx['status'] ?? 'BOOK';
                 $tx['status']         = 'BOOK' === $status ? 'booked' : 'pending';

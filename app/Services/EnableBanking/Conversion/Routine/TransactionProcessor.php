@@ -28,6 +28,7 @@ use App\Exceptions\ImporterErrorException;
 use App\Exceptions\ImporterHttpException;
 use App\Models\ImportJob;
 use App\Repository\ImportJob\ImportJobRepository;
+use App\Services\EnableBanking\Model\Account;
 use App\Services\EnableBanking\Request\GetTransactionsRequest;
 use App\Services\EnableBanking\Response\TransactionsResponse;
 use App\Services\Shared\Configuration\Configuration;
@@ -75,6 +76,9 @@ final class TransactionProcessor
         }
 
         $accounts        = $this->configuration->getAccounts();
+        $serviceAccounts = $this->importJob->getServiceAccounts();
+
+        // we look in service accounts to find the identification hash, which is necessary for uniqueness check.
         $return          = [];
 
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
@@ -82,12 +86,25 @@ final class TransactionProcessor
         $index           = 1;
 
         foreach ($accounts as $accountUid => $destinationId) {
+            $serviceAccount = null;
+            /** @var Account $current */
+            foreach($serviceAccounts as $current) {
+                if($current->getUid() === $accountUid) {
+                    $serviceAccount = $current;
+                    break;
+                }
+            }
+            if(null === $serviceAccount) {
+                throw new ImporterErrorException(sprintf('No service account found for account UID "%s"', $accountUid));
+            }
+
             Log::debug(sprintf(
-                '[%s] [%d/%d] Going to download transactions for account "%s" (into #%d)',
+                '[%s] [%d/%d] Going to download transactions for account "%s" (with hash "%s") (into #%d)',
                 config('importer.version'),
                 $index,
                 $total,
                 $accountUid,
+                $serviceAccount->getIdentificationHash(),
                 $destinationId
             ));
 
@@ -109,7 +126,7 @@ final class TransactionProcessor
                 $dateTo ?? 'null'
             ));
 
-            $request             = new GetTransactionsRequest($url, $accountUid, $dateFrom, $dateTo);
+            $request             = new GetTransactionsRequest($url, $accountUid, $serviceAccount->getIdentificationHash(), $dateFrom, $dateTo);
             $request->setTimeOut(config('importer.connection.timeout'));
 
             try {

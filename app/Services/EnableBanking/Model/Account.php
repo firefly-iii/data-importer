@@ -53,6 +53,7 @@ final class Account
         // Log::debug('Called fromArray for EB', $array);
         $account                     = new self();
         $account->uid                = $array['uid'] ?? $array['account_uid'] ?? '';
+        // account identification has is the super unique identifier.
         $account->identificationHash = $array['identification_hash'] ?? '';
 
         // Handle account_id structure per API spec
