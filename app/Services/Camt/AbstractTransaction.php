@@ -448,11 +448,12 @@ abstract class AbstractTransaction
         // but get instructed amount does not exist, so go back to the parent and grab it there.
         if (null === $amount) {
             $this->levelA->getEntries()->rewind();
-            /** @var Entry $entry */
-            foreach($this->levelA->getEntries() as $entry) {
-                 $amount = $entry->getAmount()?->getAmount();
 
-                 // temp, let's force this amount to be reversed pos/neg and see what happens.
+            /** @var Entry $entry */
+            foreach ($this->levelA->getEntries() as $entry) {
+                $amount = $entry->getAmount()?->getAmount();
+
+                // temp, let's force this amount to be reversed pos/neg and see what happens.
                 if (null !== $amount) {
                     $amount = bcmul($amount, '-1');
                 }
