@@ -520,7 +520,7 @@ return [
             'mappable'     => false,
             'level'        => 'D',
         ],
-        'entryDetailPaymentProcessorName' => [
+        'entryDetailPaymentProcessorName'                                                => [
             'title'        => 'entryDetailPaymentProcessorName',
             'default_role' => 'note',
             'roles'        => 'meta',
