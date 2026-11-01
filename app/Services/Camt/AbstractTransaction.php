@@ -376,6 +376,14 @@ abstract class AbstractTransaction
                         return '';
                     }
 
+                    // if there is an ultimate creditor, drop the iban.
+                    $ultimateCreditor = $this->getUltimateCreditor($info);
+                    if('' !== $ultimateCreditor) {
+                        Log::debug(sprintf('Found ultimate creditor "%s" for entryDetailOpposingAccountIban, so return nothing.', $ultimateCreditor));
+
+                        return '';
+                    }
+
                     if (is_object($opposingAccount) && IbanAccount::class === $opposingAccount::class) {
                         $result = (string)$opposingAccount->getIdentification();
                         Log::debug(sprintf('Found account for entryDetailOpposingAccountIban: "%s"', $result));
