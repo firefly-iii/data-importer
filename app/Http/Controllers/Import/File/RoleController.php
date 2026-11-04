@@ -150,9 +150,6 @@ final class RoleController extends Controller
         $levels         = [];
         $levels['A']    = ['title' => trans('camt.level_A'), 'explanation' => trans('camt.explain_A'), 'fields' => $this->getFieldsForLevel('A')];
         $levels['B']    = ['title' => trans('camt.level_B'), 'explanation' => trans('camt.explain_B'), 'fields' => $this->getFieldsForLevel('B')];
-        //        var_dump($levels['B']);
-        //        var_dump($roles);
-        //        exit;
         $levels['C']    = [
             'title'       => trans('camt.level_C'),
             'explanation' => trans('camt.explain_C'),
@@ -174,7 +171,7 @@ final class RoleController extends Controller
         ];
         $group_handling = $configuration->getGroupedTransactionHandling();
         if ('group' === $group_handling) {
-            $levels['D'] = ['title' => trans('camt.level_D'), 'explanation' => trans('camt.explain_D_dropped')];
+            $levels['D'] = ['title' => trans('camt.level_D'), 'explanation' => trans('camt.explain_D_dropped'), 'fields' => []];
         }
         if ('group' !== $group_handling) {
             $levels['D'] = [
