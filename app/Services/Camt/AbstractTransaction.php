@@ -369,7 +369,7 @@ abstract class AbstractTransaction
                 $info            = $this->levelD[$index] ?? null;
                 if (null !== $info) {
                     Log::debug('Found info.');
-                    $opposingAccount = $this->getOpposingParty($info)?->getAccount();
+                    $opposingAccount  = $this->getOpposingParty($info)?->getAccount();
                     if (null === $opposingAccount) {
                         Log::debug('Found NULL account for entryDetailOpposingAccountIban, so return nothing.');
 
@@ -378,7 +378,7 @@ abstract class AbstractTransaction
 
                     // if there is an ultimate creditor, drop the iban.
                     $ultimateCreditor = $this->getUltimateCreditor($info);
-                    if('' !== $ultimateCreditor) {
+                    if ('' !== $ultimateCreditor) {
                         Log::debug(sprintf('Found ultimate creditor "%s" for entryDetailOpposingAccountIban, so return nothing.', $ultimateCreditor));
 
                         return '';
