@@ -151,14 +151,15 @@ abstract class Request
         try {
             $res = $client->request('GET', $fullUrl, ['headers' => $this->getHeaders()]);
         } catch (ClientException|GuzzleException $e) {
-            Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
-
+            Log::error(sprintf('[b] Enable Banking API error: %s', $e->getMessage()));
+            $statusCode = 0;
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
                 $body = (string) $e->getResponse()->getBody();
+                $statusCode = $e->getResponse()->getStatusCode();
                 Log::error(sprintf('Response body: %s', $body));
             }
             $httpException             = new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
-            $httpException->statusCode = $e->getResponse()->getStatusCode();
+            $httpException->statusCode = $statusCode;
 
             throw $httpException;
         }
@@ -193,7 +194,7 @@ abstract class Request
         try {
             $res = $client->request('POST', $fullUrl, ['headers' => $this->getHeaders(), 'json' => $data]);
         } catch (ClientException|GuzzleException $e) {
-            Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
+            Log::error(sprintf('[c] Enable Banking API error: %s', $e->getMessage()));
 
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
                 $body = (string) $e->getResponse()->getBody();
