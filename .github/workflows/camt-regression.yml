@@ -1,0 +1,31 @@
+
+name: CAMT regression tests
+
+on:
+  push:
+    branches:
+      - fix/camt-stackable-description
+  pull_request:
+
+jobs:
+  phpunit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: bcmath, intl, mbstring, xml, dom, curl, zip
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run CAMT regression tests
+        run: vendor/bin/phpunit tests/Unit/Services/Camt/Conversion/TransactionConverterTest.php
+
