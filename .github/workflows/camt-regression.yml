@@ -26,6 +26,39 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
+      - name: Verify test detects original bug
+        run: |
+          FILE=app/Services/Camt/Conversion/TransactionConverter.php
+          cp "$FILE" /tmp/TransactionConverter.patched.php
+
+          git show "origin/main:$FILE" > "$FILE"
+
+          set +e
+          vendor/bin/phpunit \
+            tests/Unit/Services/Camt/Conversion/TransactionConverterTest.php \
+            --filter testAdditionalInfoIsPreservedAsDescription \
+            > /tmp/camt-negative.log 2>&1
+          RESULT=$?
+          set -e
+
+          cp /tmp/TransactionConverter.patched.php "$FILE"
+
+          cat /tmp/camt-negative.log
+
+          if [ "$RESULT" -eq 0 ]; then
+            echo "::error::Test did not detect the original bug"
+            exit 1
+          fi
+
+          if ! grep -q "Failed asserting" /tmp/camt-negative.log; then
+            echo "::error::Test failed for an unexpected reason"
+            exit 1
+          fi
+
+          echo "Original bug successfully detected."
+
       - name: Run CAMT regression tests
-        run: vendor/bin/phpunit tests/Unit/Services/Camt/Conversion/TransactionConverterTest.php
+        run: |
+          vendor/bin/phpunit \
+            tests/Unit/Services/Camt/Conversion/TransactionConverterTest.php
 
