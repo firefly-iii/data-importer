@@ -136,7 +136,7 @@ final class TransactionProcessor
                 $transactions = $request->get();
                 Log::debug(sprintf('TransactionsResponse: count %d transaction(s)', count($transactions)));
             } catch (ImporterHttpException $e) {
-                Log::error(sprintf('Enable Banking API error: %s', $e->getMessage()));
+                Log::error(sprintf('[a] Enable Banking API error: %s', $e->getMessage()));
                 $this->importJob->conversionStatus->addError(0, e($e->getMessage()));
                 $return[$accountUid] = [];
                 ++$index;

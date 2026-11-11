@@ -94,7 +94,9 @@ abstract class Request
             }
             $body                  = method_exists($e, 'getResponse') ? (string) $e->getResponse()->getBody() : '';
             $exception             = new ImporterHttpException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
-            $exception->statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+            if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
+                $exception->statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
+            }
 
             throw $exception;
         }
