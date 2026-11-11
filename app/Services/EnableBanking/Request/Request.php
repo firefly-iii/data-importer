@@ -150,9 +150,9 @@ abstract class Request
             $res = $client->request('GET', $fullUrl, ['headers' => $this->getHeaders()]);
         } catch (ClientException|GuzzleException $e) {
             Log::error(sprintf('[b] Enable Banking API error: %s', $e->getMessage()));
-            $statusCode = 0;
+            $statusCode                = 0;
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
-                $body = (string) $e->getResponse()->getBody();
+                $body       = (string) $e->getResponse()->getBody();
                 $statusCode = $e->getResponse()->getStatusCode();
                 Log::error(sprintf('Response body: %s', $body));
             }
