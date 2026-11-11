@@ -97,9 +97,8 @@ final class TransactionConverter
                     }
                     // some fields can be appended if they exist already.
                     if (in_array($role, config('importer.stackable_fields'), true)) {
-                        if (array_key_exists($field, $current[$role]['data'])) {
-                            $current[$role]['data'][$field] .= $value;
-                        }
+                        $current[$role]['data'][$field] =
+                            ($current[$role]['data'][$field] ?? '') . $value;
                     }
                     if (!in_array($role, config('importer.stackable_fields'), true)) {
                         $current[$role]['data'][$field] = $value;
