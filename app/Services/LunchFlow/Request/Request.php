@@ -92,8 +92,8 @@ abstract class Request
             if (method_exists($e, 'hasResponse') && !$e->hasResponse()) {
                 throw new ImporterHttpException(sprintf('Exception: %s', $e->getMessage()));
             }
-            $body                  = method_exists($e, 'getResponse') ? (string) $e->getResponse()->getBody() : '';
-            $exception             = new ImporterHttpException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
+            $body      = method_exists($e, 'getResponse') ? (string) $e->getResponse()->getBody() : '';
+            $exception = new ImporterHttpException(sprintf('Transfer exception leads to error: %s', $body), 0, $e);
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
                 $exception->statusCode = $e->getResponse() ? $e->getResponse()->getStatusCode() : 0;
             }
