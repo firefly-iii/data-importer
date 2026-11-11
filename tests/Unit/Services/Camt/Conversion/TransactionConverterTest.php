@@ -12,7 +12,7 @@ use Genkgo\Camt\DTO\Entry;
 use Mockery;
 use ReflectionClass;
 use ReflectionProperty;
-use Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
