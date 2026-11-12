@@ -28,8 +28,10 @@ use App\Exceptions\ImporterHttpException;
 use App\Http\Controllers\Controller;
 use App\Repository\ImportJob\ImportJobRepository;
 use App\Services\EnableBanking\Model\Account;
+use App\Services\EnableBanking\Request\GetASPSPsRequest;
 use App\Services\EnableBanking\Request\PostAuthRequest;
 use App\Services\EnableBanking\Request\PostSessionRequest;
+use App\Services\EnableBanking\Response\ASPSPsResponse;
 use App\Services\EnableBanking\Response\AuthResponse;
 use App\Services\EnableBanking\Response\SessionResponse;
 use Illuminate\Contracts\Foundation\Application;
@@ -43,6 +45,8 @@ use Illuminate\Support\Facades\Log;
  */
 final class LinkController extends Controller
 {
+    private const int CONSENT_SAFETY_MARGIN = 86_400;
+
     private ImportJobRepository $repository;
 
     public function __construct()
@@ -80,6 +84,7 @@ final class LinkController extends Controller
         $request->setCountry($configuration->getEnableBankingCountry());
         $request->setState($identifier);
         $request->setRedirectUrl($callbackUrl);
+        $request->setValidUntil($this->consentValidUntil($url, $configuration->getEnableBankingCountry(), $configuration->getEnableBankingBank()));
 
         /** @var AuthResponse $response */
         $response      = $request->post();
@@ -179,5 +184,25 @@ final class LinkController extends Controller
         $this->repository->saveToDisk($importJob);
 
         return redirect(route('configure-import.index', [$identifier]));
+    }
+
+    /**
+     * @throws ImporterHttpException
+     */
+    private function consentValidUntil(string $url, string $country, string $bankName): ?int
+    {
+        $banksRequest = new GetASPSPsRequest($url, $country);
+        $banksRequest->setTimeOut(config('importer.connection.timeout'));
+
+        /** @var ASPSPsResponse $banks */
+        $banks        = $banksRequest->get();
+        foreach ($banks as $bank) {
+            if ($bank->name === $bankName) {
+                return now()->getTimestamp() + $bank->maximumConsentValidity - self::CONSENT_SAFETY_MARGIN;
+            }
+        }
+        Log::warning(sprintf('Bank "%s" not found in %s, using the default consent validity.', $bankName, $country));
+
+        return null;
     }
 }
