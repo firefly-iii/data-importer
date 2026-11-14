@@ -242,8 +242,8 @@ final class Accounts extends AbstractTask
     {
         return [
             'transaction_type' => $transaction['type'],
-            'id'               => $transaction['source_id'],
-            'name'             => $transaction['source_name'],
+            'id'               => $transaction['source_id'] ?? null,
+            'name'             => $transaction['source_name'] ?? null,
             'iban'             => $transaction['source_iban'] ?? null,
             'number'           => $transaction['source_number'] ?? null,
             'bic'              => $transaction['source_bic'] ?? null,
@@ -255,8 +255,8 @@ final class Accounts extends AbstractTask
     {
         return [
             'transaction_type' => $transaction['type'],
-            'id'               => $transaction['destination_id'],
-            'name'             => $transaction['destination_name'],
+            'id'               => $transaction['destination_id'] ?? null,
+            'name'             => $transaction['destination_name'] ?? null,
             'iban'             => $transaction['destination_iban'] ?? null,
             'number'           => $transaction['destination_number'] ?? null,
             'bic'              => $transaction['destination_bic'] ?? null,

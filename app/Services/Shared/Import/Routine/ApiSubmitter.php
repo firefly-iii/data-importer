@@ -485,24 +485,32 @@ final class ApiSubmitter
                     // replace destination_name with destination_id
                     $destination = $transaction['destination_name'] ?? '';
                     if (array_key_exists($destination, $this->mapping[0])) {
+
                         unset($transaction['destination_name'], $transaction['destination_iban']);
 
                         $transaction['destination_id'] = $this->mapping[0][$destination];
-                        Log::debug(sprintf(
-                            'Replaced destination name "%s" with a reference to account id #%d (destination_id)',
-                            $destination,
-                            $this->mapping[0][$destination]
-                        ));
+                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d (destination_id)', $destination, $this->mapping[0][$destination]));
                     }
                 }
                 if ('deposit' === $transaction['type']) {
                     // replace source_name with source_id
                     $source = $transaction['source_name'] ?? '';
                     if (array_key_exists($source, $this->mapping[0])) {
-                        unset($transaction['source_name'], $transaction['source_iban']);
-
+                        $oldSourceId = $transaction['source_id'] ?? null;
+                        // set ID, then detect combi:
                         $transaction['source_id'] = $this->mapping[0][$source];
-                        Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d (source_id)', $source, $this->mapping[0][$source]));
+                        $combination = $this->getAccountCombination($transaction);
+                        if ('expense-asset' === $combination) {
+                            // invalid combination, restore old values.
+                            $transaction['source_id'] = $oldSourceId;
+                            Log::warning(sprintf('Out of cheese error: invalid combination "%s" detected, so source_id was restored to "%s" and OG values set.', $combination, $oldSourceId));
+                        }
+                        if ('expense-asset' !== $combination) {
+                            // valid combination, continue.
+                            unset($transaction['destination_name'], $transaction['destination_iban']);
+                            Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d (source_id)', $source, $this->mapping[0][$source]));
+                        }
+
                     }
                 }
                 if ('' === trim((string) ($transaction['description'] ?? ''))) {
@@ -518,15 +526,24 @@ final class ApiSubmitter
         return $line;
     }
 
-    private function updateTransactionType(array $transaction): array
-    {
+    private function getAccountCombination(array $transaction): string {
         if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
             Log::debug('Transaction has source_id/destination_id');
             $sourceId        = (int) $transaction['source_id'];
             $destinationId   = (int) $transaction['destination_id'];
             $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
             $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
-            $combi           = sprintf('%s-%s', $sourceType, $destinationType);
+            return sprintf('%s-%s', $sourceType, $destinationType);
+        }
+
+        return '';
+    }
+
+    private function updateTransactionType(array $transaction): array
+    {
+        if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
+            Log::debug('Transaction has source_id/destination_id');
+            $combi = $this->getAccountCombination($transaction);
             Log::debug(sprintf('Account type combination is "%s"', $combi));
             if ('asset-asset' === $combi) {
                 Log::debug('Both accounts are assets, so this transaction is a transfer.');

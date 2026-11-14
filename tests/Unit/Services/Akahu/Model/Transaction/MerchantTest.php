@@ -22,7 +22,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Services\Akahu\Model\Transactions;
+namespace Tests\Unit\Services\Akahu\Model\Transaction;
 
 use App\Services\Akahu\Model\Transaction\Merchant;
 use Tests\TestCase;

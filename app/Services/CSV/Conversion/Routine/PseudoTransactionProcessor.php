@@ -28,6 +28,8 @@ use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\CSV\Conversion\Task\AbstractTask;
 use App\Services\Shared\Authentication\SecretManager;
+use App\Services\Shared\Import\Routine\GetsDefaultAccount;
+use App\Services\Shared\Import\Routine\GetsPrimaryCurrency;
 use App\Support\RequestCache;
 use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
 use GrumpyDictator\FFIIIApiSupport\Model\Account;
@@ -43,9 +45,9 @@ use Illuminate\Support\Facades\Log;
  */
 final class PseudoTransactionProcessor
 {
-    private Account $defaultAccount;
+    use GetsDefaultAccount;
+    use GetsPrimaryCurrency;
     private ImportJob $importJob;
-    private TransactionCurrency $primaryCurrency;
     private array $tasks;
 
     /**
@@ -62,66 +64,9 @@ final class PseudoTransactionProcessor
         $this->getPrimaryCurrency();
     }
 
-    /**
-     * @throws ImporterErrorException
-     */
-    private function getDefaultAccount(?int $accountId): void
-    {
-        $url      = SecretManager::getBaseUrl();
-        $token    = SecretManager::getAccessToken();
-        $cacheKey = sprintf('%s-%s-%s', $url, $accountId, 'getDefaultAccount');
 
-        if (null !== $accountId) {
-            // in cache perhaps?
-            $inCache              = RequestCache::hasKeyInCache($cacheKey, $token);
-            if ($inCache) {
-                $this->defaultAccount = RequestCache::get($cacheKey, $token);
 
-                return;
-            }
 
-            $accountRequest       = new GetAccountRequest($url, $token);
-            $accountRequest->setVerify(config('importer.connection.verify'));
-            $accountRequest->setTimeOut(config('importer.connection.timeout'));
-            $accountRequest->setId($accountId);
-
-            try {
-                /** @var GetAccountResponse $result */
-                $result = $accountRequest->get();
-            } catch (ApiHttpException $e) {
-                Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-
-                throw new ImporterErrorException(sprintf('The default account in your configuration file (%d) does not exist.', $accountId));
-            }
-            $this->defaultAccount = $result->getAccount();
-            RequestCache::set($cacheKey, $token, $this->defaultAccount);
-        }
-    }
-
-    /**
-     * @throws ImporterErrorException
-     */
-    private function getPrimaryCurrency(): void
-    {
-        $url             = SecretManager::getBaseUrl();
-        $token           = SecretManager::getAccessToken();
-
-        $currencyRequest = new GetCurrencyRequest($url, $token);
-        $currencyRequest->setVerify(config('importer.connection.verify'));
-        $currencyRequest->setTimeOut(config('importer.connection.timeout'));
-        $currencyRequest->setCode('primary');
-
-        try {
-            /** @var GetCurrencyResponse $result */
-            $result                = $currencyRequest->get();
-            $this->primaryCurrency = $result->getCurrency();
-        } catch (ApiHttpException $e) {
-            Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
-
-            throw new ImporterErrorException('The primary currency could not be loaded.');
-        }
-        Log::debug(sprintf('Currency found, default currency is assumed to be "%s" (#%d)', $this->primaryCurrency->code, $this->primaryCurrency->id));
-    }
 
     public function getImportJob(): ImportJob
     {
