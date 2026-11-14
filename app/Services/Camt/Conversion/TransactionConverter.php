@@ -96,7 +96,7 @@ final class TransactionConverter
                     if (array_key_exists($field, $mapping)) {
                         $current[$role]['mapping'] = array_merge($mapping[$field], $current[$role]['mapping']);
                     }
-                    $current[$role]['data'][$field] = $value;
+                    $current[$role]['data'][$field] = trim(sprintf('%s %s', $current[$role]['data'][$field] ?? '', $value));
                     $current[$role]['data']         = array_unique($current[$role]['data']);
                 }
             }
