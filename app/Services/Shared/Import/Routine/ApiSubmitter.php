@@ -53,17 +53,17 @@ use Illuminate\Support\Facades\Log;
  */
 final class ApiSubmitter
 {
-    private array               $accountInfo;
-    private bool                $addTag;
-    private Configuration       $configuration;
-    private bool                $createdTag;
-    private ImportJob           $importJob;
-    private array               $mapping;
+    private array $accountInfo;
+    private bool $addTag;
+    private Configuration $configuration;
+    private bool $createdTag;
+    private ImportJob $importJob;
+    private array $mapping;
     private ImportJobRepository $repository;
-    private array               $roles;
-    private string              $tag;
-    private string              $tagDate;
-    private string              $vanityURL;
+    private array $roles;
+    private string $tag;
+    private string $tagDate;
+    private string $vanityURL;
 
     public function finishBatch(): void
     {
@@ -100,8 +100,8 @@ final class ApiSubmitter
         $this->repository    = new ImportJobRepository();
 
         // FIXME remove this line to crash the submission routine without the user getting an error,
-        $this->addTag    = $this->configuration->isAddImportTag();
-        $this->importJob = $importJob;
+        $this->addTag        = $this->configuration->isAddImportTag();
+        $this->importJob     = $importJob;
     }
 
     /**
@@ -121,12 +121,12 @@ final class ApiSubmitter
             $this->importJob->submissionStatus->addWarning(0, 'There are no transactions to be imported. Perhaps all your accounts are empty?');
         }
 
-        $this->vanityURL = SecretManager::getVanityUrl();
+        $this->vanityURL  = SecretManager::getVanityUrl();
 
         Log::debug(sprintf('Vanity URL: "%s"', $this->vanityURL));
 
         /**
-         * @var int $index
+         * @var int   $index
          * @var array $line
          */
         foreach ($lines as $index => $line) {
@@ -135,7 +135,7 @@ final class ApiSubmitter
             // Update progress tracking
             $this->importJob->submissionStatus->updateProgress($index + 1, $count);
             // first do local duplicate transaction check (the "cell" method):
-            $unique = $this->uniqueTransaction($index, $line);
+            $unique          = $this->uniqueTransaction($index, $line);
             if (null === $unique) {
                 Log::debug(sprintf('Transaction #%d is not checked beforehand on uniqueness.', $index + 1));
                 ++$uniqueCount;
@@ -154,7 +154,7 @@ final class ApiSubmitter
 
                 continue;
             }
-            $groupInfo = $this->processTransaction($index, $line, $lastTransaction);
+            $groupInfo       = $this->processTransaction($index, $line, $lastTransaction);
             $this->addTagToGroups($groupInfo);
             $this->repository->saveToDisk($this->importJob);
         }
@@ -171,7 +171,7 @@ final class ApiSubmitter
             // return default tag:
             return sprintf('Data Import on %s', Carbon::now()->format('Y-m-d \@ H:i'));
         }
-        $items  = [
+        $items     = [
             // '%filename%' => $this->configuration->f
             '%year%'        => Carbon::now()->format('Y'),
             '%month%'       => Carbon::now()->format('m'),
@@ -186,7 +186,7 @@ final class ApiSubmitter
             '%datetime%'    => Carbon::now()->format('Y-m-d \@ H:i'),
             '%version%'     => config('importer.version'),
         ];
-        $result = str_replace(array_keys($items), array_values($items), $customTag);
+        $result    = str_replace(array_keys($items), array_values($items), $customTag);
         Log::debug(sprintf('Custom tag is "%s", parsed into "%s"', $customTag, $result));
 
         return $result;
@@ -200,9 +200,9 @@ final class ApiSubmitter
     {
         if ('cell' !== $this->configuration->getDuplicateDetectionMethod()) {
             Log::debug(sprintf(
-                           'Duplicate detection method is "%s", so this method is skipped (return true).',
-                           $this->configuration->getDuplicateDetectionMethod()
-                       ));
+                'Duplicate detection method is "%s", so this method is skipped (return true).',
+                $this->configuration->getDuplicateDetectionMethod()
+            ));
 
             return null;
         }
@@ -214,27 +214,27 @@ final class ApiSubmitter
         if ('' === $field) {
             $field = 'external_id';
         }
-        $value = '';
+        $value        = '';
         foreach ($transactions as $transactionIndex => $transaction) {
-            $value = (string)($transaction[$field] ?? '');
+            $value        = (string) ($transaction[$field] ?? '');
             if ('' === $value) {
                 Log::debug(sprintf(
-                               'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).',
-                               $field,
-                               $index,
-                               $transactionIndex
-                           ));
+                    'Identifier-based duplicate detection found no value ("") for field "%s" in transaction #%d (index #%d).',
+                    $field,
+                    $index,
+                    $transactionIndex
+                ));
 
                 continue;
             }
             $searchResult = $this->searchField($field, $value);
             if (null !== $searchResult) {
                 Log::debug(sprintf(
-                               'Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false',
-                               $field,
-                               $value,
-                               $searchResult['id']
-                           ));
+                    'Looks like field "%s" with value "%s" is not unique, found in group #%d. Return false',
+                    $field,
+                    $value,
+                    $searchResult['id']
+                ));
                 $message = sprintf(
                     '[a115]: There is already a transaction with %s "%s" (<a href="%s/transactions/show/%d">%s</a>, %s %s).',
                     e($field),
@@ -252,7 +252,7 @@ final class ApiSubmitter
                 return false;
             }
             // could still be not unique because of deleted values.
-            $exists = $this->searchFieldUsingCount($field, $value);
+            $exists       = $this->searchFieldUsingCount($field, $value);
             if ($exists) {
                 Log::debug(sprintf('Looks like field "%s" with value "%s" is not unique, found in a deleted transaction group. Return false', $field, $value));
                 $message = sprintf('[a115]: There is already a (deleted) transaction with %s "%s", so this transaction will be skipped.', e($field), e($value));
@@ -279,9 +279,9 @@ final class ApiSubmitter
 
         Log::debug(sprintf('Going to search for %s:%s using query %s', $field, $value, $query));
 
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new GetSearchTransactionsRequest($url, $token);
+        $url            = SecretManager::getBaseUrl();
+        $token          = SecretManager::getAccessToken();
+        $request        = new GetSearchTransactionsRequest($url, $token);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setVerify(config('importer.connection.verify'));
         $request->setQuery($query);
@@ -297,8 +297,8 @@ final class ApiSubmitter
         if (0 === $response->count()) {
             return null;
         }
-        $first = $response->current();
-        $array = [
+        $first          = $response->current();
+        $array          = [
             'id'             => $first->id,
             'description'    => $first->transactions[0]->description ?? '(no description)',
             'currency_code'  => $first->transactions[0]->currencyCode ?? '(no currency)',
@@ -322,7 +322,7 @@ final class ApiSubmitter
         $request = new GetCountTransactionsRequest($url, $token);
         $request->setTimeOut(config('importer.connection.timeout'));
         $request->setVerify(config('importer.connection.verify'));
-        $set = false;
+        $set     = false;
         if ('note' === $field || 'notes' === $field) {
             Log::debug('Search for notes');
             $request->setNotes($value);
@@ -366,11 +366,11 @@ final class ApiSubmitter
     private function processTransaction(int $index, array $line, bool $lastTransaction): array
     {
         ++$index;
-        $line    = $this->cleanupLine($line);
-        $return  = [];
-        $url     = SecretManager::getBaseUrl();
-        $token   = SecretManager::getAccessToken();
-        $request = new PostTransactionRequest($url, $token);
+        $line                     = $this->cleanupLine($line);
+        $return                   = [];
+        $url                      = SecretManager::getBaseUrl();
+        $token                    = SecretManager::getAccessToken();
+        $request                  = new PostTransactionRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
 
@@ -388,7 +388,7 @@ final class ApiSubmitter
             $json      = json_decode($body, true);
             // before we complain, first check what the error is:
             if (is_array($json) && array_key_exists('message', $json)) {
-                if (str_contains((string)$json['message'], '200032')) {
+                if (str_contains((string) $json['message'], '200032')) {
                     $isDeleted = true;
                 }
             }
@@ -403,7 +403,7 @@ final class ApiSubmitter
 
                 return $return;
             }
-            $message = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
+            $message   = sprintf('[a116]: Submission HTTP error: %s', e($e->getMessage()));
             Log::error(sprintf('[%s]: %s', config('importer.version'), $e->getMessage()));
             $this->importJob->submissionStatus->addError($index, $message);
 
@@ -427,7 +427,7 @@ final class ApiSubmitter
 
         if ($response instanceof PostTransactionResponse) {
             /** @var TransactionGroup $group */
-            $group = $response->getTransactionGroup();
+            $group  = $response->getTransactionGroup();
             if (null === $group) {
                 $message = '[a118]: Could not create transaction. Unexpected empty response from Firefly III. Check the logs.';
                 Log::error(sprintf('[%s] %s', config('importer.version'), $message), $response->getRawData());
@@ -447,14 +447,14 @@ final class ApiSubmitter
 
             $return = ['group_id' => $group->id, 'journals' => []];
             foreach ($group->transactions as $transaction) {
-                $message = sprintf(
+                $message                              = sprintf(
                     'Created %s <a target="_blank" href="%s">#%d "%s"</a> (%s %s)',
                     $transaction->type,
                     sprintf('%s/transactions/show/%d', $this->vanityURL, $group->id),
                     $group->id,
                     e($transaction->description),
                     $transaction->currencyCode,
-                    round((float)$transaction->amount, (int)$transaction->currencyDecimalPlaces) // float but only for display purposes
+                    round((float) $transaction->amount, (int) $transaction->currencyDecimalPlaces) // float but only for display purposes
                 );
                 // plus 1 to keep the count.
                 $this->importJob->submissionStatus->addMessage($index, $message);
@@ -478,7 +478,7 @@ final class ApiSubmitter
             Log::debug('Configuration has mapping for opposing account name!');
 
             /**
-             * @var int $index
+             * @var int   $index
              * @var array $transaction
              */
             foreach ($line['transactions'] as $index => $transaction) {
@@ -486,40 +486,51 @@ final class ApiSubmitter
                     // replace destination_name with destination_id
                     $destination = $transaction['destination_name'] ?? '';
                     if (array_key_exists($destination, $this->mapping[0])) {
-
                         unset($transaction['destination_name'], $transaction['destination_iban']);
 
                         $transaction['destination_id'] = $this->mapping[0][$destination];
-                        Log::debug(sprintf('Replaced destination name "%s" with a reference to account id #%d (destination_id)', $destination, $this->mapping[0][$destination]));
+                        Log::debug(sprintf(
+                            'Replaced destination name "%s" with a reference to account id #%d (destination_id)',
+                            $destination,
+                            $this->mapping[0][$destination]
+                        ));
                     }
                 }
                 if ('deposit' === $transaction['type']) {
                     // replace source_name with source_id
                     $source = $transaction['source_name'] ?? '';
                     if (array_key_exists($source, $this->mapping[0])) {
-                        $oldSourceId = $transaction['source_id'] ?? null;
+                        $oldSourceId              = $transaction['source_id'] ?? null;
                         // set ID, then detect combi:
                         $transaction['source_id'] = $this->mapping[0][$source];
                         $combination              = $this->getAccountCombination($transaction);
                         if ('expense-asset' === $combination) {
                             // invalid combination, restore old values.
                             // use the name from the mapped account if present.
-                            $appAccount = $this->findApplicationAccountById((int)$this->mapping[0][$source]);
+                            $appAccount                 = $this->findApplicationAccountById((int) $this->mapping[0][$source]);
 
                             $transaction['source_id']   = $oldSourceId;
                             $transaction['source_name'] = $appAccount->name ?? $transaction['source_name'];
 
-                            Log::warning(sprintf('Out of cheese error: invalid combination "%s" detected, so source_id was restored to "%s" and source_name is set to "%s".', $combination, $oldSourceId, $transaction['source_name']));
+                            Log::warning(sprintf(
+                                'Out of cheese error: invalid combination "%s" detected, so source_id was restored to "%s" and source_name is set to "%s".',
+                                $combination,
+                                $oldSourceId,
+                                $transaction['source_name']
+                            ));
                         }
                         if ('expense-asset' !== $combination) {
                             // valid combination, continue.
                             unset($transaction['destination_name'], $transaction['destination_iban']);
-                            Log::debug(sprintf('Replaced source name "%s" with a reference to account id #%d (source_id)', $source, $this->mapping[0][$source]));
+                            Log::debug(sprintf(
+                                'Replaced source name "%s" with a reference to account id #%d (source_id)',
+                                $source,
+                                $this->mapping[0][$source]
+                            ));
                         }
-
                     }
                 }
-                if ('' === trim((string)($transaction['description'] ?? ''))) {
+                if ('' === trim((string) ($transaction['description'] ?? ''))) {
                     $transaction['description'] = '(no description)';
                 }
                 $line['transactions'][$index] = $this->updateTransactionType($transaction);
@@ -536,10 +547,11 @@ final class ApiSubmitter
     {
         if (array_key_exists('source_id', $transaction) && array_key_exists('destination_id', $transaction)) {
             Log::debug('Transaction has source_id/destination_id');
-            $sourceId        = (int)$transaction['source_id'];
-            $destinationId   = (int)$transaction['destination_id'];
+            $sourceId        = (int) $transaction['source_id'];
+            $destinationId   = (int) $transaction['destination_id'];
             $sourceType      = $this->accountInfo[$sourceId] ?? 'unknown';
             $destinationType = $this->accountInfo[$destinationId] ?? 'unknown';
+
             return sprintf('%s-%s', $sourceType, $destinationType);
         }
 
@@ -570,9 +582,9 @@ final class ApiSubmitter
         if (3 !== count($parts)) {
             return '(unknown)';
         }
-        $index = (int)$parts[1];
+        $index = (int) $parts[1];
 
-        return (string)($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
+        return (string) ($transaction['transactions'][$index][$parts[2]] ?? '(not found)');
     }
 
     private function isDuplicationError(string $key, string $error): bool
@@ -596,13 +608,13 @@ final class ApiSubmitter
             if (
                 array_key_exists('currency_id', $line['transactions'][$index])
                 && null !== $line['transactions'][$index]['currency_id']
-                && (int)$line['transactions'][$index]['currency_id'] !== (int)$transaction->currencyId
+                && (int) $line['transactions'][$index]['currency_id'] !== (int) $transaction->currencyId
             ) {
                 $this->importJob->submissionStatus->addWarning($lineIndex, sprintf(
                     'Line #%d may have had its currency changed (from ID #%d to ID #%d). This happens because the associated asset account overrules the currency of the transaction.',
                     $lineIndex,
                     $line['transactions'][$index]['currency_id'],
-                    (int)$transaction->currencyId
+                    (int) $transaction->currencyId
                 ));
             }
             // compare currency code:
@@ -638,12 +650,12 @@ final class ApiSubmitter
             $this->createdTag = true;
         }
 
-        $groupId = (int)$groupInfo['group_id'];
+        $groupId = (int) $groupInfo['group_id'];
         Log::debug(sprintf('Going to add import tag to transaction group #%d', $groupId));
-        $body = ['fire_webhooks' => false, 'batch_submission' => true, 'apply_rules' => false, 'transactions' => []];
+        $body    = ['fire_webhooks' => false, 'batch_submission' => true, 'apply_rules' => false, 'transactions' => []];
 
         /**
-         * @var int $journalId
+         * @var int   $journalId
          * @var array $currentTags
          */
         foreach ($groupInfo['journals'] as $journalId => $currentTags) {
@@ -679,7 +691,7 @@ final class ApiSubmitter
         $request = new PostTagRequest($url, $token);
         $request->setVerify(config('importer.connection.verify'));
         $request->setTimeOut(config('importer.connection.timeout'));
-        $body = ['tag' => $this->tag, 'date' => $this->tagDate];
+        $body    = ['tag' => $this->tag, 'date' => $this->tagDate];
         $request->setBody($body);
 
         try {
@@ -718,6 +730,7 @@ final class ApiSubmitter
                 }
             }
         }
+
         return null;
     }
 }

@@ -27,17 +27,8 @@ namespace App\Services\CSV\Conversion\Routine;
 use App\Exceptions\ImporterErrorException;
 use App\Models\ImportJob;
 use App\Services\CSV\Conversion\Task\AbstractTask;
-use App\Services\Shared\Authentication\SecretManager;
 use App\Services\Shared\Import\Routine\GetsDefaultAccount;
 use App\Services\Shared\Import\Routine\GetsPrimaryCurrency;
-use App\Support\RequestCache;
-use GrumpyDictator\FFIIIApiSupport\Exceptions\ApiHttpException;
-use GrumpyDictator\FFIIIApiSupport\Model\Account;
-use GrumpyDictator\FFIIIApiSupport\Model\TransactionCurrency;
-use GrumpyDictator\FFIIIApiSupport\Request\GetAccountRequest;
-use GrumpyDictator\FFIIIApiSupport\Request\GetCurrencyRequest;
-use GrumpyDictator\FFIIIApiSupport\Response\GetAccountResponse;
-use GrumpyDictator\FFIIIApiSupport\Response\GetCurrencyResponse;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -47,6 +38,7 @@ final class PseudoTransactionProcessor
 {
     use GetsDefaultAccount;
     use GetsPrimaryCurrency;
+
     private ImportJob $importJob;
     private array $tasks;
 
@@ -63,10 +55,6 @@ final class PseudoTransactionProcessor
         $this->getDefaultAccount($defaultAccountId);
         $this->getPrimaryCurrency();
     }
-
-
-
-
 
     public function getImportJob(): ImportJob
     {
