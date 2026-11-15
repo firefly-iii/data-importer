@@ -40,7 +40,7 @@ final class PseudoTransactionProcessor
     use GetsPrimaryCurrency;
 
     private ImportJob $importJob;
-    private array $tasks;
+    private array     $tasks;
 
     /**
      * PseudoTransactionProcessor constructor.
@@ -99,7 +99,7 @@ final class PseudoTransactionProcessor
                 $object->setTransactionCurrency($this->primaryCurrency);
             }
 
-            $line   = $object->process($line);
+            $line = $object->process($line);
         }
         Log::debug('Final transaction: ', $line);
 

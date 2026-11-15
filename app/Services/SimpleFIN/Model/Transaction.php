@@ -34,11 +34,11 @@ final class Transaction
 {
     private readonly string $amount;
     private readonly string $description;
-    private array $extra;
+    private array           $extra;
     private readonly string $id;
-    private readonly bool $pending;
-    private readonly int $posted;
-    private readonly ?int $transactedAt;
+    private readonly bool   $pending;
+    private readonly int    $posted;
+    private readonly ?int   $transactedAt;
 
     public function __construct(array $data)
     {
@@ -92,6 +92,11 @@ final class Transaction
     public function getAbsoluteAmount(): float
     {
         return abs($this->getAmountAsFloat());
+    }
+
+    public function getAmountAsFloat(): float
+    {
+        return (float)$this->amount;
     }
 
     public function getAmount(): string
@@ -162,11 +167,6 @@ final class Transaction
     public function isDeposit(): bool
     {
         return $this->getAmountAsFloat() >= 0;
-    }
-
-    public function getAmountAsFloat(): float
-    {
-        return (float) $this->amount;
     }
 
     public function isPending(): bool

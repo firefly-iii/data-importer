@@ -32,9 +32,11 @@ use Illuminate\Support\Collection;
 final class Country
 {
     public function __construct(
-        public string $code,
+        public string     $code,
         public Collection $banks
-    ) {}
+    )
+    {
+    }
 
     public function addBank(Bank $bank): void
     {

@@ -38,9 +38,11 @@ final class Institution
     public string $name;
     public string $routingNumber     = '';
     public string $url;
-    private bool $isFinancial;
+    private bool  $isFinancial;
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     public static function fromArray(array $data): self
     {
@@ -55,7 +57,7 @@ final class Institution
 
         // LoginFormUserName is connected to LoginFormFields[x][DisplayText]
 
-        $fields                    = ['LoginFormUserName', 'LoginFormPassword', 'RoutingNumber', 'LoginFormFields', 'MultipleRoutingNumbers'];
+        $fields = ['LoginFormUserName', 'LoginFormPassword', 'RoutingNumber', 'LoginFormFields', 'MultipleRoutingNumbers'];
         if (array_key_exists('InstitutionDetail', $data) && is_array($data['InstitutionDetail'])) {
             foreach ($data['InstitutionDetail'] as $field => $value) {
                 if (!in_array($field, $fields, true)) {
@@ -83,7 +85,7 @@ final class Institution
                         break;
 
                     case 'RoutingNumber':
-                        $institution->routingNumber     = $value;
+                        $institution->routingNumber = $value;
 
                         break;
 
@@ -91,7 +93,7 @@ final class Institution
                         if (!is_array($value)) {
                             throw new ImporterHttpException('Institution field "LoginFormFields" is not an array.', $field);
                         }
-                        $institution->loginFormFields   = $value;
+                        $institution->loginFormFields = $value;
 
                         break;
                 }

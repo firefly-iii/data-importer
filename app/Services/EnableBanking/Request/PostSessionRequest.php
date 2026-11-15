@@ -58,7 +58,7 @@ final class PostSessionRequest extends Request
     public function post(): Response
     {
         // perhaps grab fake data instead?
-        $grabFake   = (bool) config('importer.fake_data');
+        $grabFake   = (bool)config('importer.fake_data');
         $fakeExists = file_exists($this->fakeDataPath);
         $json       = [];
         if ($grabFake && $fakeExists) {
@@ -80,7 +80,7 @@ final class PostSessionRequest extends Request
         }
 
         // store fake data in new thing:
-        if ($grabFake && !$fakeExists && true === (bool) config('importer.store_fake_data')) {
+        if ($grabFake && !$fakeExists && true === (bool)config('importer.store_fake_data')) {
             Log::debug('Will store this run as fake data to use the next time.');
 
             try {

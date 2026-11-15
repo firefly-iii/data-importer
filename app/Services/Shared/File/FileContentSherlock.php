@@ -30,7 +30,6 @@ use Genkgo\Camt\MessageFormatInterface;
 use Genkgo\Camt\Reader;
 use Illuminate\Support\Facades\Log;
 use Safe\Exceptions\FilesystemException;
-
 use function Safe\file_get_contents;
 
 /**

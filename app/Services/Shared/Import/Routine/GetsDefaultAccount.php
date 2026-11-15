@@ -48,14 +48,14 @@ trait GetsDefaultAccount
 
         if (null !== $accountId) {
             // in cache perhaps?
-            $inCache              = RequestCache::hasKeyInCache($cacheKey, $token);
+            $inCache = RequestCache::hasKeyInCache($cacheKey, $token);
             if ($inCache) {
                 $this->defaultAccount = RequestCache::get($cacheKey, $token);
 
                 return;
             }
 
-            $accountRequest       = new GetAccountRequest($url, $token);
+            $accountRequest = new GetAccountRequest($url, $token);
             $accountRequest->setVerify(config('importer.connection.verify'));
             $accountRequest->setTimeOut(config('importer.connection.timeout'));
             $accountRequest->setId($accountId);

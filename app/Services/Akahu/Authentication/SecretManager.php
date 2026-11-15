@@ -36,11 +36,6 @@ final class SecretManager
         return [self::APP_ID_TOKEN => self::getAppIdToken(), self::USER_ACCESS_TOKEN => self::getUserAccessToken()];
     }
 
-    public static function hasAppIdToken(): bool
-    {
-        return '' !== self::getAppIdToken();
-    }
-
     public static function getAppIdToken(): string
     {
         if (session()->exists(self::APP_ID_TOKEN)) {
@@ -55,11 +50,6 @@ final class SecretManager
         session()->put(self::APP_ID_TOKEN, $token);
     }
 
-    public static function hasUserAccessToken(): bool
-    {
-        return '' !== self::getUserAccessToken();
-    }
-
     public static function getUserAccessToken(): string
     {
         if (session()->exists(self::USER_ACCESS_TOKEN)) {
@@ -72,6 +62,16 @@ final class SecretManager
     public static function setUserAccessToken(#[SensitiveParameter] string $token): void
     {
         session()->put(self::USER_ACCESS_TOKEN, $token);
+    }
+
+    public static function hasAppIdToken(): bool
+    {
+        return '' !== self::getAppIdToken();
+    }
+
+    public static function hasUserAccessToken(): bool
+    {
+        return '' !== self::getUserAccessToken();
     }
 
     public static function setSecrets(array $data): void

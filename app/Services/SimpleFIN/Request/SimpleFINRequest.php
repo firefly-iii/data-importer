@@ -42,8 +42,8 @@ abstract class SimpleFINRequest
 {
     private string $accessToken = '';
     private string $apiUrl;
-    private array $parameters   = [];
-    private float $timeOut;
+    private array  $parameters  = [];
+    private float  $timeOut;
     private string $token;
 
     public function setAccessToken(#[SensitiveParameter] string $accessToken): void
@@ -101,7 +101,7 @@ abstract class SimpleFINRequest
     private function handleClientException(ClientException $e): void
     {
         $statusCode = $e->getResponse()->getStatusCode();
-        $body       = (string) $e->getResponse()->getBody();
+        $body       = (string)$e->getResponse()->getBody();
 
         Log::error(sprintf('SimpleFIN HTTP %d error: %s', $statusCode, $body));
 
@@ -119,7 +119,7 @@ abstract class SimpleFINRequest
                 throw new ImporterErrorException('SimpleFIN rate limit exceeded');
 
             default:
-                throw new ImporterErrorException(sprintf('SimpleFIN API error (HTTP %d): %s', $statusCode, $body));
+                throw new ImporterErrorException(sprintf('SimpleFIN API error (HTTP %d)', $statusCode));
         }
     }
 

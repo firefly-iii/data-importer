@@ -39,17 +39,17 @@ use Override;
  */
 final class RoutineManager implements RoutineManagerInterface
 {
-    private array $downloaded;
-    private ImportJob $importJob;
-    private ImportJobRepository $repository;
+    private array                $downloaded;
+    private ImportJob            $importJob;
+    private ImportJobRepository  $repository;
     private GenerateTransactions $transactionGenerator;
     private TransactionProcessor $transactionProcessor;
 
     public function __construct(ImportJob $importJob)
     {
-        $this->downloaded           = [];
-        $this->repository           = new ImportJobRepository();
-        $this->importJob            = $importJob;
+        $this->downloaded = [];
+        $this->repository = new ImportJobRepository();
+        $this->importJob  = $importJob;
         $this->importJob->refreshInstanceIdentifier();
 
         $this->transactionProcessor = new TransactionProcessor();
@@ -99,7 +99,7 @@ final class RoutineManager implements RoutineManagerInterface
         }
 
         // then generate the transactions
-        $transactions    = $this->transactionGenerator->getTransactions($this->downloaded);
+        $transactions = $this->transactionGenerator->getTransactions($this->downloaded);
         Log::debug(sprintf('Generated %d Firefly III transactions.', count($transactions)));
 
         // return everything.

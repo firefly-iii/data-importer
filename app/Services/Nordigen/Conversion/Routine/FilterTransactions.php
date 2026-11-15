@@ -32,7 +32,9 @@ final class FilterTransactions
     /**
      * FilterTransactions constructor.
      */
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     public function filter(array $transactions): array
     {

@@ -34,7 +34,8 @@ final class TransactionExtractor
 {
     public function __construct(
         private Configuration $configuration
-    ) {
+    )
+    {
         Log::debug(sprintf('[%s] Now in %s', config('importer.version'), __METHOD__));
         $this->configuration = $configuration;
     }
@@ -48,7 +49,7 @@ final class TransactionExtractor
         $totalCount   = count($statements);
 
         /**
-         * @var int           $i
+         * @var int $i
          * @var CamtStatement $statement
          */
         foreach ($statements as $i => $statement) { // -> Level B

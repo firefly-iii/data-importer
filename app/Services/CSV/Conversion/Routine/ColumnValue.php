@@ -32,12 +32,12 @@ use Illuminate\Support\Facades\Log;
  */
 final class ColumnValue
 {
-    private bool $appendValue;
+    private bool    $appendValue;
     private ?string $configuration;
-    private int $mappedValue;
-    private string $originalRole;
-    private string $role;
-    private string $value;
+    private int     $mappedValue;
+    private string  $originalRole;
+    private string  $role;
+    private string  $value;
 
     /**
      * ColumnValue constructor.
@@ -79,7 +79,7 @@ final class ColumnValue
         }
 
         // run converter on data:
-        $converterClass = (string) config(sprintf('csv.import_roles.%s.converter', $this->role));
+        $converterClass = (string)config(sprintf('csv.import_roles.%s.converter', $this->role));
         Log::debug(sprintf('getParsedValue will run "%s"', $converterClass));
 
         return ConverterService::convert($converterClass, $this->value, $this->configuration);
