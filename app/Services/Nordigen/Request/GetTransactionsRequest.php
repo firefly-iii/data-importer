@@ -39,14 +39,13 @@ use SensitiveParameter;
 final class GetTransactionsRequest extends Request
 {
     public function __construct(
-        string                  $url,
+        string $url,
         #[SensitiveParameter]
-        string                  $token,
+        string $token,
         private readonly string $identifier,
-        string                  $dateFrom,
-        string                  $dateTo
-    )
-    {
+        string $dateFrom,
+        string $dateTo
+    ) {
         $params  = [];
         $pattern = '/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][\d]|3[01])$/';
         $result  = preg_match($pattern, $dateFrom);
@@ -55,7 +54,7 @@ final class GetTransactionsRequest extends Request
             $params['date_from'] = $dateFrom;
         }
 
-        $result = preg_match($pattern, $dateTo);
+        $result  = preg_match($pattern, $dateTo);
         if ('' !== $dateTo && 1 === $result) {
             $params['date_to'] = $dateTo;
         }
@@ -95,9 +94,9 @@ final class GetTransactionsRequest extends Request
                 $return = array_merge($return, $set);
             }
         }
-        $total = count($return);
+        $total        = count($return);
         Log::debug(sprintf('Downloaded [%d:%d] transactions from bank account "%s"', $count, $total, $this->identifier));
-        $response = new GetTransactionsResponse($return);
+        $response     = new GetTransactionsResponse($return);
         $response->setAccountId($this->identifier);
         $response->processData();
 

@@ -31,11 +31,11 @@ use Illuminate\Support\Facades\Log;
 
 final class TransactionConverter
 {
-    private int       $defaultAccount = 0;
-    private bool      $errorIfHash    = true;
-    private bool      $fireWebhooks   = true;
+    private int  $defaultAccount = 0;
+    private bool $errorIfHash    = true;
+    private bool $fireWebhooks   = true;
     private ImportJob $importJob;
-    private bool      $isRules        = true;
+    private bool $isRules        = true;
 
     public function __construct(ImportJob $importJob)
     {
@@ -60,13 +60,13 @@ final class TransactionConverter
 
     private function convertTransaction(Transaction $original): array
     {
-        $return = [
+        $return                   = [
             'fire_webhooks'           => $this->fireWebhooks,
             'apply_rules'             => $this->isRules,
             'error_if_duplicate_hash' => $this->errorIfHash,
             'transactions'            => [],
         ];
-        $split  = [
+        $split                    = [
             'type'          => 'withdrawal',
             'date'          => null === $original->date ? now()->toW3cString() : $original->date->toW3cString(),
             'amount'        => Steam::positive($original->amount),
@@ -82,8 +82,8 @@ final class TransactionConverter
             //      "destination_id": "2",
             //      "destination_name": "Buy and Large",
 
-            'book_date'    => null === $original->postDate ? '' : $original->postDate->toW3cString(),
-            'process_date' => null === $original->transactionDate ? '' : $original->transactionDate->toW3cString(),
+            'book_date'     => null === $original->postDate ? '' : $original->postDate->toW3cString(),
+            'process_date'  => null === $original->transactionDate ? '' : $original->transactionDate->toW3cString(),
         ];
 
         if (1 === bccomp($original->amount, '0', 2)) {

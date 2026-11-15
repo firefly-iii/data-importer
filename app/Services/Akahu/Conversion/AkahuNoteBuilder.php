@@ -42,7 +42,7 @@ final class AkahuNoteBuilder extends NoteBuilder
      */
     public function build(): string
     {
-        $meta = $this->transaction->getMeta();
+        $meta     = $this->transaction->getMeta();
 
         $this->renderSection('Transaction Metadata', [
             new Field('Particulars', $meta?->getParticulars()),

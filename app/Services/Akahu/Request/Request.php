@@ -38,14 +38,14 @@ use SensitiveParameter;
 
 abstract class Request
 {
-    private string       $apiBaseUrl;
-    private string       $appIdToken;
-    private bool         $debug;
+    private string $apiBaseUrl;
+    private string $appIdToken;
+    private bool $debug;
     private HandlerStack $handlerStack;
-    private array        $historicRequests = [];
-    private array        $queryParams      = [];
-    private float        $timeOut          = 30.0;
-    private string       $userAccessToken;
+    private array $historicRequests = [];
+    private array $queryParams      = [];
+    private float $timeOut          = 30.0;
+    private string $userAccessToken;
 
     public function __construct()
     {
@@ -97,19 +97,19 @@ abstract class Request
 
     final protected function authenticatedGet(string $apiPath): array
     {
-        $apiUrl = sprintf('%s/%s', $this->apiBaseUrl, $apiPath);
+        $apiUrl           = sprintf('%s/%s', $this->apiBaseUrl, $apiPath);
 
-        $headers = [
+        $headers          = [
             'Accept'        => 'application/json',
             'User-Agent'    => sprintf('FF3-data-importer/%s', config('importer.version')),
             'Authorization' => sprintf('Bearer %s', $this->userAccessToken),
             'X-Akahu-Id'    => $this->appIdToken,
         ];
 
-        $query = $this->queryParams;
-        $debug = $this->debug;
+        $query            = $this->queryParams;
+        $debug            = $this->debug;
 
-        $opts = ['headers' => $headers, 'query' => $query, 'debug' => $debug];
+        $opts             = ['headers' => $headers, 'query' => $query, 'debug' => $debug];
 
         $handlerStackName = [];
 
@@ -117,7 +117,7 @@ abstract class Request
             $opts['handler'] = $this->handlerStack;
         }
 
-        $client = $this->getClient();
+        $client           = $this->getClient();
 
         try {
             $response = $client->request('GET', $apiUrl, $opts);
@@ -137,12 +137,12 @@ abstract class Request
             Log::debug(sprintf('Fetched from from endpoint "%s"', $lastRequest->getUri()));
         }
 
-        $json = json_decode((string)$response->getBody(), true);
+        $json             = json_decode((string) $response->getBody(), true);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
             $msg = sprintf('Akahu api returned invalid json (%s). See logs for more details.', $apiUrl);
 
-            Log::error($msg . ' json: "' . $response->getBody() . '"');
+            Log::error($msg.' json: "'.$response->getBody().'"');
 
             throw new ImporterErrorException($msg);
         }

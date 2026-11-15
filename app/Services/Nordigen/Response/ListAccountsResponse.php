@@ -36,13 +36,13 @@ use Iterator;
  */
 final class ListAccountsResponse extends Response implements Iterator, Countable
 {
-    private array               $accounts;
+    private array $accounts;
     private readonly Collection $collection;
-    private int                 $position = 0;
+    private int $position = 0;
 
     public function __construct(array $data)
     {
-        $this->accounts = [];
+        $this->accounts   = [];
 
         Log::debug('ListAccountsResponse:', $data ?? []);
 

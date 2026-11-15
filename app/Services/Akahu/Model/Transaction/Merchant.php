@@ -32,10 +32,10 @@ final class Merchant
     private ?string $akahuId = null;
 
     // The Akahu Merchant name
-    private ?string $name = null;
+    private ?string $name    = null;
 
     // The Akahu Merchant website
-    private ?string $nzbn = null;
+    private ?string $nzbn    = null;
 
     // Undocumented
     // https://www.nzbn.govt.nz/
@@ -46,7 +46,7 @@ final class Merchant
      */
     public static function fromJson(array $json): self
     {
-        $merchant = new self();
+        $merchant          = new self();
 
         $merchant->akahuId = $json['_id'] ?? null;
         $merchant->name    = $json['name'] ?? null;

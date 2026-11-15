@@ -41,8 +41,8 @@ trait GetsPrimaryCurrency
      */
     protected function getPrimaryCurrency(): void
     {
-        $url   = SecretManager::getBaseUrl();
-        $token = SecretManager::getAccessToken();
+        $url             = SecretManager::getBaseUrl();
+        $token           = SecretManager::getAccessToken();
 
         $currencyRequest = new GetCurrencyRequest($url, $token);
         $currencyRequest->setVerify(config('importer.connection.verify'));

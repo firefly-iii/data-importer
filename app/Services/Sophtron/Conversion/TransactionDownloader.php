@@ -59,7 +59,7 @@ final class TransactionDownloader
         // need to download or grab service accounts, so the data can be used to create new accounts.
         if (0 === count($this->importJob->getServiceAccounts())) {
             Log::debug('Import job has no Sophtron accounts, will redownload them.');
-            $collector = new NewJobDataCollector();
+            $collector                     = new NewJobDataCollector();
             $collector->setImportJob($this->importJob);
             $collector->downloadInstitutionsByUser();
             $this->importJob               = $collector->getImportJob();
@@ -68,7 +68,7 @@ final class TransactionDownloader
 
         /**
          * @var string $importServiceAccountId
-         * @var int $applicationAccountId
+         * @var int    $applicationAccountId
          */
         foreach ($accounts as $importServiceAccountId => $applicationAccountId) {
             Log::debug(sprintf('Now processing account "%s": #%d', $importServiceAccountId, $applicationAccountId));
@@ -98,20 +98,20 @@ final class TransactionDownloader
 
     private function getTransactions(string $accountId): array
     {
-        $userId    = SecretManager::getSophtronUserId($this->importJob);
-        $accessKey = SecretManager::getSophtronAccessKey($this->importJob);
+        $userId        = SecretManager::getSophtronUserId($this->importJob);
+        $accessKey     = SecretManager::getSophtronAccessKey($this->importJob);
 
         // before and after dates:
         $configuration = $this->importJob->getConfiguration();
         $configuration->updateDateRange();
-        $notBefore = $configuration->getDateNotBefore();
-        $notAfter  = $configuration->getDateNotAfter();
+        $notBefore     = $configuration->getDateNotBefore();
+        $notAfter      = $configuration->getDateNotAfter();
 
-        $request = new PostGetTransactionsByTransactionDateRequest($userId, $accessKey, $accountId, $notBefore, $notAfter);
+        $request       = new PostGetTransactionsByTransactionDateRequest($userId, $accessKey, $accountId, $notBefore, $notAfter);
 
         /** @var PostGetTransactionsByTransactionDateResponse $response */
-        $response = $request->post();
-        $return   = [];
+        $response      = $request->post();
+        $return        = [];
 
         /** @var Transaction $transaction */
         foreach ($response as $transaction) {

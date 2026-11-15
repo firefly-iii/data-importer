@@ -31,10 +31,10 @@ use Illuminate\Support\Facades\Log;
 
 final class RoutineManager implements RoutineManagerInterface
 {
-    private TransactionConverter  $converter;
+    private TransactionConverter $converter;
     private TransactionDownloader $downloader;
-    private ImportJob             $importJob;
-    private ImportJobRepository   $repository;
+    private ImportJob $importJob;
+    private ImportJobRepository $repository;
 
     public function __construct(ImportJob $importJob)
     {
@@ -61,13 +61,13 @@ final class RoutineManager implements RoutineManagerInterface
         $downloaded       = $this->downloader->download();
 
         // get import job back from downloader.
-        $this->importJob = $this->downloader->getImportJob();
+        $this->importJob  = $this->downloader->getImportJob();
         $this->repository->saveToDisk($this->importJob);
 
         // convert to Firefly III compatible arrays, fixes mapping if necessary.
-        $this->converter = new TransactionConverter($this->importJob);
-        $transactions    = $this->converter->convert($downloaded);
-        $this->importJob = $this->converter->getImportJob();
+        $this->converter  = new TransactionConverter($this->importJob);
+        $transactions     = $this->converter->convert($downloaded);
+        $this->importJob  = $this->converter->getImportJob();
         $this->repository->saveToDisk($this->importJob);
 
         return $transactions;

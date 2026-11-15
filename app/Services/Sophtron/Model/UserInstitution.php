@@ -59,7 +59,7 @@ final class UserInstitution
             }
         }
 
-        $object->lastModified = Carbon::parse($data['LastModified']);
+        $object->lastModified      = Carbon::parse($data['LastModified']);
 
         return $object;
     }

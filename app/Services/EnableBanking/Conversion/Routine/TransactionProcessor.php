@@ -45,11 +45,11 @@ final class TransactionProcessor
 
     private const string DATE_TIME_FORMAT = 'Y-m-d H:i:s';
 
-    private array         $accounts  = [];
+    private array $accounts               = [];
     private Configuration $configuration;
-    private ImportJob     $importJob;
-    private ?Carbon       $notAfter  = null;
-    private ?Carbon       $notBefore = null;
+    private ImportJob $importJob;
+    private ?Carbon $notAfter             = null;
+    private ?Carbon $notBefore            = null;
 
     public function __construct()
     {
@@ -79,14 +79,14 @@ final class TransactionProcessor
         $serviceAccounts = $this->importJob->getServiceAccounts();
 
         // we look in service accounts to find the identification hash, which is necessary for uniqueness check.
-        $return = [];
+        $return          = [];
 
         Log::debug(sprintf('Found %d accounts to download from.', count($accounts)));
-        $total = count($accounts);
-        $index = 1;
+        $total           = count($accounts);
+        $index           = 1;
 
         foreach ($accounts as $accountUid => $destinationId) {
-            $serviceAccount = null;
+            $serviceAccount      = null;
 
             /** @var Account $current */
             foreach ($serviceAccounts as $current) {
@@ -101,14 +101,14 @@ final class TransactionProcessor
             }
 
             Log::debug(sprintf(
-                           '[%s] [%d/%d] Going to download transactions for account "%s" (with hash "%s") (into #%d)',
-                           config('importer.version'),
-                           $index,
-                           $total,
-                           $accountUid,
-                           $serviceAccount->getIdentificationHash(),
-                           $destinationId
-                       ));
+                '[%s] [%d/%d] Going to download transactions for account "%s" (with hash "%s") (into #%d)',
+                config('importer.version'),
+                $index,
+                $total,
+                $accountUid,
+                $serviceAccount->getIdentificationHash(),
+                $destinationId
+            ));
 
             if (0 === $destinationId) {
                 Log::debug('No destination ID found, create account');
@@ -116,19 +116,19 @@ final class TransactionProcessor
                 Log::debug(sprintf('Newly created account #%d', $destinationId));
             }
 
-            $url      = config('eb.url');
-            $dateFrom = '' !== $this->configuration->getDateNotBefore() ? $this->configuration->getDateNotBefore() : null;
-            $dateTo   = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : null;
+            $url                 = config('eb.url');
+            $dateFrom            = '' !== $this->configuration->getDateNotBefore() ? $this->configuration->getDateNotBefore() : null;
+            $dateTo              = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : null;
 
             Log::debug(sprintf(
-                           'GetTransactionsRequest parameters: url=%s, accountUid=%s, dateFrom=%s, dateTo=%s',
-                           $url,
-                           $accountUid,
-                           $dateFrom ?? 'null',
-                           $dateTo ?? 'null'
-                       ));
+                'GetTransactionsRequest parameters: url=%s, accountUid=%s, dateFrom=%s, dateTo=%s',
+                $url,
+                $accountUid,
+                $dateFrom ?? 'null',
+                $dateTo ?? 'null'
+            ));
 
-            $request = new GetTransactionsRequest($url, $accountUid, $serviceAccount->getIdentificationHash(), $dateFrom, $dateTo);
+            $request             = new GetTransactionsRequest($url, $accountUid, $serviceAccount->getIdentificationHash(), $dateFrom, $dateTo);
             $request->setTimeOut(config('importer.connection.timeout'));
 
             try {
@@ -178,7 +178,7 @@ final class TransactionProcessor
         }
 
         foreach ($transactions as $transaction) {
-            $madeOn = $transaction->getDate();
+            $madeOn   = $transaction->getDate();
 
             if (!$getPending && 'pending' === $transaction->status) {
                 Log::debug(sprintf('Skip pending transaction made on "%s".', $madeOn->format(self::DATE_TIME_FORMAT)));
@@ -188,20 +188,20 @@ final class TransactionProcessor
 
             if ($this->notBefore instanceof Carbon && $madeOn->lt($this->notBefore)) {
                 Log::debug(sprintf(
-                               'Skip transaction because "%s" is before "%s".',
-                               $madeOn->format(self::DATE_TIME_FORMAT),
-                               $this->notBefore->format(self::DATE_TIME_FORMAT)
-                           ));
+                    'Skip transaction because "%s" is before "%s".',
+                    $madeOn->format(self::DATE_TIME_FORMAT),
+                    $this->notBefore->format(self::DATE_TIME_FORMAT)
+                ));
 
                 continue;
             }
 
             if ($this->notAfter instanceof Carbon && $madeOn->gt($this->notAfter)) {
                 Log::debug(sprintf(
-                               'Skip transaction because "%s" is after "%s".',
-                               $madeOn->format(self::DATE_TIME_FORMAT),
-                               $this->notAfter->format(self::DATE_TIME_FORMAT)
-                           ));
+                    'Skip transaction because "%s" is after "%s".',
+                    $madeOn->format(self::DATE_TIME_FORMAT),
+                    $this->notAfter->format(self::DATE_TIME_FORMAT)
+                ));
 
                 continue;
             }

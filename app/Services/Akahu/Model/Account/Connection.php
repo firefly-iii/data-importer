@@ -30,7 +30,7 @@ final class Connection
     private ?string $connectionType = null;
 
     // A URL pointing to an image of the provider's logo.
-    private ?string $logo = null;
+    private ?string $logo           = null;
 
     // The type of integration used to connect to this institution.
     // This will be one of:
@@ -38,14 +38,14 @@ final class Connection
     //    to connect to the institution.
     //  - official: An official open banking connection, which uses the institution's
     //    official open banking APIs.
-    private ?string $name = null;
+    private ?string $name           = null;
 
     /**
      * Deserialize a connection structure from disk
      */
     public static function fromArray(array $data): self
     {
-        $connection = new self();
+        $connection                 = new self();
 
         $connection->name           = $data['name'] ?? null;
         $connection->logo           = $data['logo'] ?? null;
@@ -59,7 +59,7 @@ final class Connection
      */
     public static function fromJson(array $json): self
     {
-        $connection = new self();
+        $connection                 = new self();
 
         $connection->name           = $json['name'] ?? null;
         $connection->logo           = $json['logo'] ?? null;

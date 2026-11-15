@@ -34,13 +34,11 @@ final class CleanInteger implements ConverterInterface
      */
     public function convert(mixed $value): int
     {
-        return (int)$value;
+        return (int) $value;
     }
 
     /**
      * Add extra configuration parameters.
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }
