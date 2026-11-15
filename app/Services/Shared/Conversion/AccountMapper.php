@@ -68,13 +68,13 @@ final class AccountMapper
         Log::info(sprintf('Creating Firefly III account "%s" via API', $accountName));
 
         try {
-            $request = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request  = new PostAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
 
             // Build account creation payload
-            $payload = ['name' => $accountName, 'type' => $accountType, 'currency_code' => $currencyCode, 'active' => true, 'include_net_worth' => true];
+            $payload  = ['name' => $accountName, 'type' => $accountType, 'currency_code' => $currencyCode, 'active' => true, 'include_net_worth' => true];
 
             // Add opening balance date if opening balance is provided
-            if ('' !== (string)$openingBalance && is_numeric($openingBalance) && '0.00' !== $openingBalance) {
+            if ('' !== (string) $openingBalance && is_numeric($openingBalance) && '0.00' !== $openingBalance) {
                 $payload['opening_balance']      = $openingBalance;
                 $payload['opening_balance_date'] = $config['opening_balance_date'] ?? Carbon::now()->format('Y-m-d');
             }
@@ -87,7 +87,7 @@ final class AccountMapper
             // Add liability-specific fields for liability accounts
             if (in_array($accountType, [AccountType::DEBT, AccountType::LOAN, AccountType::MORTGAGE, AccountType::LIABILITIES, 'liability'], true)) {
                 // Map account type to liability type
-                $liabilityTypeMap = [
+                $liabilityTypeMap               = [
                     AccountType::DEBT        => 'debt',
                     AccountType::LOAN        => 'loan',
                     AccountType::MORTGAGE    => 'mortgage',
@@ -100,12 +100,12 @@ final class AccountMapper
             }
 
             // Add IBAN if provided
-            if (array_key_exists('iban', $config) && '' !== (string)$config['iban'] && IbanConverter::isValidIban((string)$config['iban'])) {
+            if (array_key_exists('iban', $config) && '' !== (string) $config['iban'] && IbanConverter::isValidIban((string) $config['iban'])) {
                 $payload['iban'] = $config['iban'];
             }
 
             // Add account number if provided
-            if (array_key_exists('account_number', $config) && '' !== (string)$config['account_number']) {
+            if (array_key_exists('account_number', $config) && '' !== (string) $config['account_number']) {
                 $payload['account_number'] = $config['account_number'];
             }
 
@@ -160,8 +160,8 @@ final class AccountMapper
     private function getCurrencyCode(ImportServiceAccount $account, array $config): string
     {
         // 1. Use user-configured currency first
-        if (array_key_exists('currency', $config) && '' !== (string)$config['currency']) {
-            return (string)$config['currency'];
+        if (array_key_exists('currency', $config) && '' !== (string) $config['currency']) {
+            return (string) $config['currency'];
         }
 
         // 2. Fall back to account currency
@@ -194,7 +194,7 @@ final class AccountMapper
                 $errorMessage  = $e->getMessage();
 
                 // Check if this is a DNS/connection timeout error that we should retry
-                $shouldRetry = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
+                $shouldRetry   = $this->shouldRetryApiCall($errorMessage, $attempt, count($retryDelays));
 
                 if (!$shouldRetry) {
                     Log::error(sprintf('Non-retryable API error for account "%s": %s', $accountName, $errorMessage));
@@ -239,7 +239,7 @@ final class AccountMapper
             'Temporary failure in name resolution',
         ];
 
-        return array_any($retryableErrors, static fn($retryableError) => false !== stripos($errorMessage, $retryableError));
+        return array_any($retryableErrors, static fn ($retryableError) => false !== stripos($errorMessage, $retryableError));
     }
 
     /**
@@ -252,7 +252,7 @@ final class AccountMapper
         // Try to find by name first
         $matchingAccounts = array_filter(
             $this->fireflyIIIAccounts,
-            static fn(Account $current) => strtolower((string)$current->name) === strtolower($account->name)
+            static fn (Account $current) => strtolower((string) $current->name) === strtolower($account->name)
         );
 
         if (0 === count($matchingAccounts)) {
@@ -263,7 +263,7 @@ final class AccountMapper
 
         // Try to search via API
         try {
-            $request = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
+            $request  = new GetSearchAccountRequest(SecretManager::getBaseUrl(), SecretManager::getAccessToken());
             $request->setField('name');
             $request->setQuery($account->name);
             $response = $request->get();
@@ -296,8 +296,8 @@ final class AccountMapper
 
         try {
             // Verify authentication context before making API calls
-            $baseUrl     = SecretManager::getBaseUrl();
-            $accessToken = SecretManager::getAccessToken();
+            $baseUrl                  = SecretManager::getBaseUrl();
+            $accessToken              = SecretManager::getAccessToken();
 
             if ('' === $baseUrl || '' === $accessToken) {
                 Log::warning('Missing authentication context for Firefly III account loading');
@@ -307,9 +307,9 @@ final class AccountMapper
             $this->fireflyIIIAccounts = [];
 
             // double request to also get the liabilities
-            $request = new GetAccountsRequest($baseUrl, $accessToken);
+            $request                  = new GetAccountsRequest($baseUrl, $accessToken);
             $request->setType(AccountType::ASSET);
-            $response = $request->get();
+            $response                 = $request->get();
 
             if ($response instanceof GetAccountsResponse) {
                 $this->fireflyIIIAccounts = iterator_to_array($response);
@@ -317,9 +317,9 @@ final class AccountMapper
             }
 
             // double request to also get the liabilities
-            $request = new GetAccountsRequest($baseUrl, $accessToken);
+            $request                  = new GetAccountsRequest($baseUrl, $accessToken);
             $request->setType(AccountType::LIABILITIES);
-            $response = $request->get();
+            $response                 = $request->get();
 
             if ($response instanceof GetAccountsResponse) {
                 $array                    = array_values(iterator_to_array($response));

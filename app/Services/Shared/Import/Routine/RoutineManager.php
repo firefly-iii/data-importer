@@ -33,13 +33,12 @@ use Illuminate\Support\Facades\Log;
  */
 final class RoutineManager
 {
-    private ApiSubmitter  $apiSubmitter;
+    private ApiSubmitter $apiSubmitter;
     private InfoCollector $infoCollector;
 
     public function __construct(
         private ImportJob $importJob
-    )
-    {
+    ) {
         $importJob->refreshInstanceIdentifier();
     }
 
@@ -53,7 +52,7 @@ final class RoutineManager
 
         // FIXME again with the collecting of accounts?
         Log::debug('First collect account information from Firefly III.');
-        $accountInfo = $this->infoCollector->collectAccountTypes();
+        $accountInfo     = $this->infoCollector->collectAccountTypes();
 
         Log::debug('Now starting submission by calling API Submitter');
         // submit transactions to API:
@@ -63,11 +62,11 @@ final class RoutineManager
 
         $this->importJob = $this->apiSubmitter->getImportJob();
         Log::debug(sprintf(
-                       'Routine manager: messages: %d, warnings: %d, errors: %d',
-                       count($this->importJob->submissionStatus->messages),
-                       count($this->importJob->submissionStatus->warnings),
-                       count($this->importJob->submissionStatus->errors)
-                   ));
+            'Routine manager: messages: %d, warnings: %d, errors: %d',
+            count($this->importJob->submissionStatus->messages),
+            count($this->importJob->submissionStatus->warnings),
+            count($this->importJob->submissionStatus->errors)
+        ));
     }
 
     private function setConfiguration(): void

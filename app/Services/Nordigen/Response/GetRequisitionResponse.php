@@ -31,7 +31,7 @@ use App\Services\Shared\Response\Response;
  */
 final class GetRequisitionResponse extends Response
 {
-    public array  $accounts;
+    public array $accounts;
     public string $id;
 
     public function __construct(array $data)

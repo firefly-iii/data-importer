@@ -35,11 +35,11 @@ use App\Services\Shared\Response\Response;
 final class PostAuthRequest extends Request
 {
     private string $aspsp;
-    private string $country    = '';
-    private string $psuType    = 'personal';
+    private string $country  = '';
+    private string $psuType  = 'personal';
     private string $redirectUrl;
-    private string $state      = '';
-    private ?int   $validUntil = null;
+    private string   $state  = '';
+    private ?int $validUntil = null;
 
     public function __construct(string $url)
     {
@@ -66,7 +66,7 @@ final class PostAuthRequest extends Request
             'psu_type'     => $this->psuType,
         ]; // RFC3339 format
 
-        $json = $this->authenticatedPost($data);
+        $json                = $this->authenticatedPost($data);
 
         return AuthResponse::fromArray($json);
     }

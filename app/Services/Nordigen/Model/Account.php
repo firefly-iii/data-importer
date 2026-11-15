@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class Account
 {
-    private array  $balances = [];
+    private array $balances = [];
     private string $bban;
     private string $bic;
     private string $cashAccountType;
@@ -43,7 +43,7 @@ final class Account
     private string $linkedAccounts;
     private string $msisdn;
     private string $name;
-    private array  $ownerAddressUnstructured;
+    private array $ownerAddressUnstructured;
     private string $ownerName;
     private string $product;
     private string $resourceId;

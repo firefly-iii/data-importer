@@ -62,7 +62,7 @@ final class Amount implements ConverterInterface
 
         Log::debug(sprintf('Start with amount "%s"', $value));
         $original    = $value;
-        $value       = $this->stripAmount((string)$value);
+        $value       = $this->stripAmount((string) $value);
         $decimal     = null;
         $thousandSep = null;
 
@@ -171,7 +171,7 @@ final class Amount implements ConverterInterface
         }
         // @codeCoverageIgnoreStart
         Log::debug(sprintf('Final value is: "%s"', $value));
-        $formatted = sprintf('%01.12f', $value);
+        $formatted   = sprintf('%01.12f', $value);
         Log::debug(sprintf('Is formatted to : "%s"', $formatted));
 
         return $formatted;
@@ -192,11 +192,11 @@ final class Amount implements ConverterInterface
         // This way of stripping exceptions is unsustainable.
         $value = trim(str_replace(['€', 'EUR'], '', $value));
         $str   = preg_replace('/[^\-().,0-9 ]/', '', $value);
-        $len   = strlen((string)$str);
-        if (str_starts_with((string)$str, '(') && ')' === $str[$len - 1]) {
-            $str = sprintf('-%s', substr((string)$str, 1, $len - 2));
+        $len   = strlen((string) $str);
+        if (str_starts_with((string) $str, '(') && ')' === $str[$len - 1]) {
+            $str = sprintf('-%s', substr((string) $str, 1, $len - 2));
         }
-        $str = trim((string)$str);
+        $str   = trim((string) $str);
 
         Log::debug(sprintf('Stripped "%s" to "%s"', $value, $str));
 
@@ -265,7 +265,7 @@ final class Amount implements ConverterInterface
     {
         $decimal = null;
         Log::debug('Decimal is still NULL, probably number with >2 decimals. Search for a dot.');
-        $res = strrpos($value, '.');
+        $res     = strrpos($value, '.');
         if (false !== $res) {
             // blandly assume this is the one.
             Log::debug(sprintf('Searched from the left for "." in amount "%s", assume this is the decimal sign.', $value));
@@ -286,7 +286,7 @@ final class Amount implements ConverterInterface
             $search = ['.', ' '];
         }
         Log::debug(sprintf('Search because decimal separator is a "%s":', $decimal), $search);
-        $value = str_replace($search, '', $value);
+        $value  = str_replace($search, '', $value);
 
         // @noinspection CascadeStringReplacementInspection
         return str_replace(',', '.', $value);
@@ -295,7 +295,5 @@ final class Amount implements ConverterInterface
     /**
      * Add extra configuration parameters.
      */
-    public function setConfiguration(string $configuration): void
-    {
-    }
+    public function setConfiguration(string $configuration): void {}
 }

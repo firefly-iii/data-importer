@@ -58,22 +58,22 @@ final class ImportJob implements Arrayable
     public ConversionStatus $conversionStatus;
     public string $identifier;
     public SubmissionStatus $submissionStatus;
-    private array          $applicationAccounts   = [];
-    private array          $authenticationDetails = [];
-    private ?Configuration $configuration         = null;
-    private string         $configurationString   = '';
-    private array          $convertedTransactions = [];
+    private array              $applicationAccounts   = [];
+    private array              $authenticationDetails = [];
+    private ?Configuration $configuration             = null;
+    private string             $configurationString   = '';
+    private array              $convertedTransactions = [];
     private Carbon $createdAt;
-    private array  $currencies                    = [];
-    private string $flow                          = '';
-    private string $importableFileString          = '';
-    private bool   $initialized                   = false;
-    private int    $instanceCounter               = 0;
+    private array  $currencies                        = [];
+    private string $flow                              = '';
+    private string $importableFileString              = '';
+    private bool   $initialized                       = false;
+    private int    $instanceCounter                   = 0;
 
     // collected Firefly III data.
-    private string $instanceIdentifier            = '';
-    private array  $serviceAccounts               = [];
-    private array  $sophtronInstitutions          = [];
+    private string $instanceIdentifier                = '';
+    private array  $serviceAccounts                   = [];
+    private array  $sophtronInstitutions              = [];
     private string $state;
 
     private function __construct()

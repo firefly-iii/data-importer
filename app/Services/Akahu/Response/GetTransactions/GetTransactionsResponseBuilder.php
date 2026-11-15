@@ -42,7 +42,7 @@ final class GetTransactionsResponseBuilder
         if (array_key_exists('success', $json)) {
             if (!$json['success']) {
                 $msg = 'Akahu api returned a success value of "false". See logs for more details';
-                Log::error($msg . ' json: "' . json_encode($json) . '"');
+                Log::error($msg.' json: "'.json_encode($json).'"');
 
                 throw new ImporterErrorException($msg);
             }
@@ -66,7 +66,7 @@ final class GetTransactionsResponseBuilder
 
         $msg = 'Akahu api returned badly structured json, expected response to contain';
         $msg .= ' a "success" attribute and an "items" attribute. See logs for more details.';
-        Log::error($msg . ' json: "' . json_encode($json) . '"');
+        Log::error($msg.' json: "'.json_encode($json).'"');
 
         throw new ImporterErrorException($msg);
     }

@@ -39,10 +39,10 @@ final class SecretManager
         if (!self::hasBaseUrl()) {
             Log::debug('No base url in getBaseUrl() session, will return config variable.');
 
-            return (string)config('importer.url');
+            return (string) config('importer.url');
         }
 
-        return (string)session()->get(Constants::SESSION_BASE_URL);
+        return (string) session()->get(Constants::SESSION_BASE_URL);
     }
 
     /**
@@ -61,10 +61,10 @@ final class SecretManager
         if (!self::hasClientId()) {
             Log::debug('No client id in hasClientId() session, will return config variable.');
 
-            return (string)config('importer.client_id');
+            return (string) config('importer.client_id');
         }
 
-        return (string)session()->get(Constants::SESSION_CLIENT_ID);
+        return (string) session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     /**
@@ -72,7 +72,7 @@ final class SecretManager
      */
     private static function hasClientId(): bool
     {
-        return session()->has(Constants::SESSION_CLIENT_ID) && '' !== (string)session()->get(Constants::SESSION_CLIENT_ID);
+        return session()->has(Constants::SESSION_CLIENT_ID) && '' !== (string) session()->get(Constants::SESSION_CLIENT_ID);
     }
 
     public static function getSophtronAccessKey(?ImportJob $importJob = null): string
@@ -85,24 +85,24 @@ final class SecretManager
     {
         $identifier = $importJob ? $importJob->identifier : 'NULL';
         Log::debug(sprintf('Now in getField("%s","%s","%s", "%s")', $fieldName, $configName, $sessionField, $identifier));
-        $result = '';
+        $result     = '';
         // check: session
         if (session()->has($sessionField)) {
             Log::debug(sprintf('There is a "%s" in the session.', $sessionField));
-            $result = (string)session()->get($sessionField);
+            $result = (string) session()->get($sessionField);
         }
         // check: import job.
         if ('' === $result && null !== $importJob) {
             Log::debug(sprintf('Check if "%s" is in the import job.', $fieldName));
             $details = $importJob->getAuthenticationDetails();
             if (array_key_exists($fieldName, $details)) {
-                $result = (string)$details[$fieldName];
+                $result = (string) $details[$fieldName];
             }
         }
         // check: config
         if ('' === $result) {
             Log::debug(sprintf('Check if "%s" is in the config.', $fieldName));
-            $result = (string)config($configName);
+            $result = (string) config($configName);
         }
         Log::debug(sprintf('Return result. strlen=%d', strlen($result)));
 
@@ -119,14 +119,14 @@ final class SecretManager
     {
         if (!self::hasVanityUrl()) {
             Log::debug('No vanity url in getVanityUrl() session, will return config variable.');
-            if ('' === (string)config('importer.vanity_url')) {
-                return (string)config('importer.url');
+            if ('' === (string) config('importer.vanity_url')) {
+                return (string) config('importer.url');
             }
 
-            return (string)config('importer.vanity_url');
+            return (string) config('importer.vanity_url');
         }
 
-        return (string)session()->get(Constants::SESSION_VANITY_URL);
+        return (string) session()->get(Constants::SESSION_VANITY_URL);
     }
 
     /**
@@ -175,7 +175,7 @@ final class SecretManager
 
         $token = request()?->header('Authorization', '');
         if (is_array($token)) {
-            $token = (string)reset($token);
+            $token = (string) reset($token);
         }
         if ('' === $token) {
             Log::debug('Access token in header is empty, will be ignored.');
@@ -191,10 +191,10 @@ final class SecretManager
         }
         if (null === $token) {
             Log::debug('Access token is null, use config instead.');
-            $token = (string)config('importer.access_token');
+            $token = (string) config('importer.access_token');
         }
 
-        return (string)$token;
+        return (string) $token;
     }
 
     /**

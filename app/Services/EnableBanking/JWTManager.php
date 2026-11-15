@@ -64,12 +64,12 @@ final class JWTManager
         $appId      = SecretManager::getAppId();
         $privateKey = SecretManager::getPrivateKey();
 
-        $now     = time();
-        $payload = ['iss' => 'enablebanking.com', 'aud' => 'api.enablebanking.com', 'iat' => $now, 'exp' => $now + self::TOKEN_EXPIRY_SECONDS];
+        $now        = time();
+        $payload    = ['iss' => 'enablebanking.com', 'aud' => 'api.enablebanking.com', 'iat' => $now, 'exp' => $now + self::TOKEN_EXPIRY_SECONDS];
 
         // The 4th parameter is the key ID (kid) which must be included in the JWT header
         // Enable Banking requires kid to be the Application ID
-        $token = JWT::encode($payload, $privateKey, 'RS256', $appId);
+        $token      = JWT::encode($payload, $privateKey, 'RS256', $appId);
         Log::debug('Enable Banking JWT token generated successfully');
 
         return $token;

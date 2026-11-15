@@ -42,19 +42,19 @@ use Override;
  */
 final class RoutineManager implements RoutineManagerInterface
 {
-    private ColumnValueConverter       $columnValueConverter;
-    private Configuration              $configuration;
-    private CSVFileProcessor           $csvFileProcessor;
-    private ImportJob                  $importJob;
-    private LineProcessor              $lineProcessor;
+    private ColumnValueConverter $columnValueConverter;
+    private Configuration $configuration;
+    private CSVFileProcessor $csvFileProcessor;
+    private ImportJob $importJob;
+    private LineProcessor $lineProcessor;
     private PseudoTransactionProcessor $pseudoTransactionProcessor;
-    private ImportJobRepository        $repository;
+    private ImportJobRepository $repository;
 
     public function __construct(ImportJob $importJob)
     {
-        $this->importJob     = $importJob;
-        $this->configuration = $importJob->getConfiguration();
-        $this->repository    = new ImportJobRepository();
+        $this->importJob                  = $importJob;
+        $this->configuration              = $importJob->getConfiguration();
+        $this->repository                 = new ImportJobRepository();
         $this->importJob->refreshInstanceIdentifier();
 
         $this->csvFileProcessor           = new CSVFileProcessor($this->importJob);
@@ -109,7 +109,7 @@ final class RoutineManager implements RoutineManagerInterface
         $this->importJob = $importJob;
         $this->repository->saveToDisk($importJob);
 
-        $count = count($CSVLines);
+        $count           = count($CSVLines);
 
         if (0 === $count) {
             $this->importJob->conversionStatus->addError(0, '[a105]: No transactions found in CSV file.');
