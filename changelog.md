@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v2.3.6 - 2026-10-18
 
-<!-- summary: In this release some tiny but important bugs were fixed for Enable Banking and Akahu -->
+<!-- summary: In this release some small but important bugs were fixed for Enable Banking and Akahu -->
 
 ### Fixed
 - [PR 1431](https://github.com/firefly-iii/data-importer/pull/1431) (Add "akahu" to flow enum in v3 config schema) created by @Void4506
@@ -19,7 +19,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Expand Enable Banking import with new date fields.
 
 ### Security
-- Fixed some unescaped data, reported by @router0mail
+- Fixed some unescaped data, reported by @router0mail.
+- Fixed URL parsing issues, reported by Claude.
 
 ## v2.3.5 - 2026-09-23
 
