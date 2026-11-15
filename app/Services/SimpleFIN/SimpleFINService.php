@@ -205,16 +205,16 @@ final class SimpleFINService
     private function reconstructUrl(array $parts): string
     {
         $auth = '';
-        if (isset($parts['user']) && isset($parts['pass'])) {
+        if (array_key_exists('user', $parts) && '' !== (string) $parts['user'] && array_key_exists('pass', $parts) && '' !== (string) $parts['pass']) {
             $auth = sprintf('%s:%s@', $parts['user'], $parts['pass']);
         }
-        if (isset($parts['user']) && !isset($parts['pass'])) {
+        if (array_key_exists('user', $parts) && '' !== (string) $parts['user'] && !array_key_exists('pass', $parts)) {
             $auth = sprintf('%s@', $parts['user']);
         }
         $scheme = $parts['scheme'] ?? '';
         $host   = $parts['host'] ?? '';
         $path   = $parts['path'] ?? '';
-        $query  = isset($parts['query']) ? sprintf('?%s', $parts['query']) : '';
+        $query  = array_key_exists('query', $parts) && '' !== (string) $parts['query'] ? sprintf('?%s', $parts['query']) : '';
         return sprintf('%s://%s%s%s%s', $scheme, $auth, $host, $path, $query);
     }
 
