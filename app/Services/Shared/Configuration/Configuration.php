@@ -679,6 +679,7 @@ final class Configuration
         }
 
         return $this->reconstructUrl($parts);
+
         // Log::debug(sprintf('Config: Given url is "%s", reconstructed url is "%s"', $accessToken, $constructedUrl));
     }
 
