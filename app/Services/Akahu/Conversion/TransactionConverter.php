@@ -142,7 +142,7 @@ final class TransactionConverter
     private function appendWithdrawalInfo(array $fireflyTransaction, Transaction $akahuTransaction): array
     {
         $fireflyTransaction['type']             = 'withdrawal';
-        $amount                                 = $akahuTransaction->getAmount() * new Number('-1');
+        $amount                                 = null === $akahuTransaction->getAmount() ? new Number('0') : $akahuTransaction->getAmount() * new Number('-1');
         // FIXME: pull dp from api
         $fireflyTransaction['amount']           = Steam::bcstringify($amount, 2);
         $fireflyTransaction['source_id']        = $this->transactionFetcher->getFireflyAccountId();
