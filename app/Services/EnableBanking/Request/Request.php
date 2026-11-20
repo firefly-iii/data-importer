@@ -90,13 +90,16 @@ abstract class Request
         } catch (ClientException|GuzzleException $e) {
             Log::error(sprintf('[b] Enable Banking API error: %s', $e->getMessage()));
             $statusCode                = 0;
+            $json                      = [];
             if (method_exists($e, 'getResponse') && method_exists($e, 'hasResponse') && $e->hasResponse()) {
                 $body       = (string) $e->getResponse()->getBody();
                 $statusCode = $e->getResponse()->getStatusCode();
+                $json       = (array) json_decode($body, true);
                 Log::error(sprintf('Response body: %s', $body));
             }
             $httpException             = new ImporterHttpException(sprintf('Enable Banking API error: %s', $e->getMessage()), 0, $e);
             $httpException->statusCode = $statusCode;
+            $httpException->json       = $json;
 
             throw $httpException;
         }
