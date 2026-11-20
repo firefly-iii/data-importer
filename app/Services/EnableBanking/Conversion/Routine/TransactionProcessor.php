@@ -118,14 +118,14 @@ final class TransactionProcessor
 
             $url                 = config('eb.url');
             $dateFrom            = '' !== $this->configuration->getDateNotBefore() ? $this->configuration->getDateNotBefore() : null;
-            $dateTo              = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : null;
+            $dateTo              = '' !== $this->configuration->getDateNotAfter() ? $this->configuration->getDateNotAfter() : now()->format('Y-m-d');
 
             Log::debug(sprintf(
                 'GetTransactionsRequest parameters: url=%s, accountUid=%s, dateFrom=%s, dateTo=%s',
                 $url,
                 $accountUid,
                 $dateFrom ?? 'null',
-                $dateTo ?? 'null'
+                $dateTo
             ));
 
             $request             = new GetTransactionsRequest($url, $accountUid, $serviceAccount->getIdentificationHash(), $dateFrom, $dateTo);
