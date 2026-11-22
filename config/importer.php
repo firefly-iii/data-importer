@@ -220,6 +220,7 @@ return [
         'ISO-8859-15',
         'ISO-8859-16',
         'Windows-1251',
+        'SJIS'
     ],
     // some random lines for the data importer to use.
     'line_a'                        => 'Everything precious is fragile',
