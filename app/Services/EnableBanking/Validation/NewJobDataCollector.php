@@ -137,7 +137,12 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
                         /** @var AccountDetailsResponse $res */
                         $res = $getAccountDetailRequest->get();
                     } catch (ImporterHttpException $e) {
-                        throw new ImporterErrorException($e->getMessage(), 0, $e);
+                        if (!$this->isRefusedByBank($e)) {
+                            throw new ImporterErrorException($e->getMessage(), 0, $e);
+                        }
+                        Log::warning(sprintf('Skipping account "%s", Enable Banking could not read it: %s', $account, $e->getMessage()));
+
+                        continue;
                     }
                     $accounts[]              = $res->account;
                 }
@@ -197,5 +202,10 @@ final class NewJobDataCollector implements NewJobDataCollectorInterface
     public function validate(): MessageBag
     {
         return new MessageBag();
+    }
+
+    private function isRefusedByBank(ImporterHttpException $e): bool
+    {
+        return 400 === $e->statusCode && 'ASPSP_ERROR' === ($e->json['error'] ?? '');
     }
 }

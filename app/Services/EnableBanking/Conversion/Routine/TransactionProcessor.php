@@ -97,7 +97,13 @@ final class TransactionProcessor
                 }
             }
             if (null === $serviceAccount) {
-                throw new ImporterErrorException(sprintf('No service account found for account UID "%s"', $accountUid));
+                $message             = sprintf('Skipping account "%s", Enable Banking no longer lists it', $accountUid);
+                Log::warning($message);
+                $this->importJob->conversionStatus->addWarning(0, e($message));
+                $return[$accountUid] = [];
+                ++$index;
+
+                continue;
             }
 
             Log::debug(sprintf(
